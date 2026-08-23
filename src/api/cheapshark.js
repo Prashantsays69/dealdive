@@ -111,16 +111,15 @@ export function getStoreLogo(storeImages) {
 }
 
 /**
- * Get high-resolution thumbnail / capsule for a game card
- * Uses Steam's high-res capsule (616x353) or header.jpg if available
+ * Get high-resolution banner image for a game card
+ * Uses canonical Steam header.jpg (460x215) which matches the 460/215 aspect ratio perfectly
  */
 export function getGameImage(deal) {
   if (deal.steamAppID) {
-    return `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${deal.steamAppID}/capsule_616x353.jpg`;
+    return `https://cdn.cloudflare.steamstatic.com/steam/apps/${deal.steamAppID}/header.jpg`;
   }
-  // If thumb is from cheapshark, try to get a cleaner image URL
   if (deal.thumb) {
-    return deal.thumb.replace('capsule_sm_120', 'header');
+    return deal.thumb;
   }
   return '';
 }
@@ -130,7 +129,7 @@ export function getGameImage(deal) {
  */
 export function getHeroImage(deal) {
   if (deal.steamAppID) {
-    return `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${deal.steamAppID}/library_hero.jpg`;
+    return `https://cdn.cloudflare.steamstatic.com/steam/apps/${deal.steamAppID}/library_hero.jpg`;
   }
   return getGameImage(deal);
 }
