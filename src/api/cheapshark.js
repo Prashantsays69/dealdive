@@ -111,22 +111,100 @@ export function getStoreLogo(storeImages) {
 }
 
 /**
- * Get a higher-resolution thumbnail for a game
- * Falls back to CheapShark thumb if steamAppID not available
+ * Get high-resolution thumbnail / capsule for a game card
+ * Uses Steam's high-res capsule (616x353) or header.jpg if available
  */
 export function getGameImage(deal) {
   if (deal.steamAppID) {
-    return `https://cdn.akamai.steamstatic.com/steam/apps/${deal.steamAppID}/header.jpg`;
+    return `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${deal.steamAppID}/capsule_616x353.jpg`;
   }
-  return deal.thumb || '';
+  // If thumb is from cheapshark, try to get a cleaner image URL
+  if (deal.thumb) {
+    return deal.thumb.replace('capsule_sm_120', 'header');
+  }
+  return '';
 }
 
 /**
- * Get a large hero-quality image for a game
+ * Get high-res hero image for a game banner
  */
 export function getHeroImage(deal) {
   if (deal.steamAppID) {
-    return `https://cdn.akamai.steamstatic.com/steam/apps/${deal.steamAppID}/library_hero.jpg`;
+    return `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${deal.steamAppID}/library_hero.jpg`;
   }
-  return deal.thumb || '';
+  return getGameImage(deal);
+}
+
+/**
+ * Deduplicate deals by game title so the same game doesn't repeat 5 times in a row
+ */
+export function deduplicateDeals(deals) {
+  if (!Array.isArray(deals)) return [];
+  const seenTitles = new Map();
+
+  deals.forEach(deal => {
+    // Normalize title to group editions (e.g. "Suicide Squad: Kill the Justice League", "Suicide Squad Deluxe")
+    const cleanTitle = deal.title
+      .toLowerCase()
+      .replace(/\b(deluxe|ultimate|gold|edition|goty|bundle|standard)\b/g, '')
+      .replace(/[^a-z0-9]/g, '')
+      .trim();
+
+    if (!seenTitles.has(cleanTitle)) {
+      seenTitles.set(cleanTitle, deal);
+    } else {
+      // If current deal has higher savings, replace the stored deal
+      const existing = seenTitles.get(cleanTitle);
+      if (parseFloat(deal.savings) > parseFloat(existing.savings)) {
+        seenTitles.set(cleanTitle, deal);
+      }
+    }
+  });
+
+  return Array.from(seenTitles.values());
+}
+
+/**
+ * Fetch top popular deals for Hero Carousel
+ * Filters for high-metacritic / well-known titles with high-res artwork
+ */
+export async function fetchHeroDeals() {
+  try {
+    // Attempt 1: Fetch deals with Metacritic >= 70
+    let deals = await fetchDeals({
+      pageSize: 40,
+      sortBy: 'Deal Rating',
+      onSale: true,
+      metacritic: 70,
+    });
+
+    // Deduplicate deals
+    let uniqueDeals = deduplicateDeals(deals);
+
+    // Filter to only deals that have a Steam App ID (guarantees high quality artwork)
+    let heroDeals = uniqueDeals.filter(d => d.steamAppID && parseInt(d.metacriticScore) >= 70);
+
+    // Fallback if not enough games match Metacritic >= 70
+    if (heroDeals.length < 5) {
+      const fallbackDeals = await fetchDeals({
+        pageSize: 40,
+        sortBy: 'Deal Rating',
+        onSale: true,
+        steamRating: 75,
+      });
+      const uniqueFallback = deduplicateDeals(fallbackDeals).filter(d => d.steamAppID);
+      
+      const set = new Map();
+      [...heroDeals, ...uniqueFallback].forEach(d => set.set(d.dealID, d));
+      heroDeals = Array.from(set.values());
+    }
+
+    // Sort by Metacritic score descending
+    heroDeals.sort((a, b) => (parseInt(b.metacriticScore) || 0) - (parseInt(a.metacriticScore) || 0));
+
+    return heroDeals.slice(0, 5);
+  } catch (err) {
+    console.error('Failed to fetch hero deals:', err);
+    return [];
+  }
 }

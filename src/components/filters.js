@@ -27,12 +27,14 @@ const sortOptions = [
   { value: 'Release', label: 'Newest' },
 ];
 
+const USD_TO_INR = 83;
+
 const priceRanges = [
   { label: 'Free', lower: 0, upper: 0 },
-  { label: 'Under $5', lower: 0, upper: 5 },
-  { label: 'Under $10', lower: 0, upper: 10 },
-  { label: 'Under $20', lower: 0, upper: 20 },
-  { label: '$20+', lower: 20, upper: null },
+  { label: 'Under ₹500', lower: 0, upper: 500 / USD_TO_INR },
+  { label: 'Under ₹1,000', lower: 0, upper: 1000 / USD_TO_INR },
+  { label: 'Under ₹2,000', lower: 0, upper: 2000 / USD_TO_INR },
+  { label: '₹2,000+', lower: 2000 / USD_TO_INR, upper: null },
 ];
 
 const discountRanges = [

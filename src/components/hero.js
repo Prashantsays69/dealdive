@@ -4,7 +4,7 @@
 
 import { $, el, icons, lazyImage } from '../utils/dom.js';
 import { formatPrice, formatDiscount } from '../utils/format.js';
-import { fetchDeals, getHeroImage, getGameImage, getDealLink, getStoreLogo } from '../api/cheapshark.js';
+import { fetchHeroDeals, getHeroImage, getGameImage, getDealLink } from '../api/cheapshark.js';
 
 let currentSlide = 0;
 let autoplayTimer = null;
@@ -14,21 +14,16 @@ export async function initHero(storesMap) {
   const hero = $('#hero');
   if (!hero) return;
 
-  // Fetch top 5 deals for the hero
   try {
-    const deals = await fetchDeals({
-      pageSize: 5,
-      sortBy: 'Deal Rating',
-      onSale: true,
-      metacritic: 60, // Only well-rated games for hero
-    });
+    const deals = await fetchHeroDeals();
 
-    slides = deals.slice(0, 5);
-    if (slides.length === 0) {
+    slides = deals;
+    if (!slides || slides.length === 0) {
       hero.style.display = 'none';
       return;
     }
 
+    hero.style.display = 'block';
     renderHero(hero, slides, storesMap);
     startAutoplay();
 

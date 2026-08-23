@@ -40,7 +40,12 @@ export function createDealCard(deal, storesMap, featured = false, index = 0) {
   // Build card HTML
   card.innerHTML = `
     <div class="deal-card-image">
-      <img src="${gameImg}" alt="${deal.title}" loading="lazy" onload="this.classList.add('loaded')" onerror="this.classList.add('loaded'); this.style.background='var(--color-skeleton)'" />
+      <img src="${gameImg}" alt="${deal.title}" loading="lazy" 
+           onload="this.classList.add('loaded')" 
+           onerror="if(this.src !== '${deal.thumb || ''}' && '${deal.thumb || ''}'){ this.src='${deal.thumb}'; } else { this.classList.add('loaded'); this.style.display='none'; this.nextElementSibling.classList.add('show-placeholder'); }" />
+      <div class="deal-image-placeholder">
+        <span class="placeholder-title">${deal.title}</span>
+      </div>
       ${savings > 0 ? `<span class="deal-discount-badge${savings >= 75 ? ' huge' : ''}">${formatDiscount(savings)}</span>` : ''}
       ${isFree ? '<span class="deal-free-badge">Free</span>' : ''}
     </div>

@@ -271,7 +271,7 @@
 .filter-bar {
   position: sticky;
   top: 64px;
-  z-index: var(--z-filter);
+  z-index: 500;
   background: rgba(246, 246, 242, 0.95);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -285,11 +285,9 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.filter-bar-inner::-webkit-scrollbar {
-  display: none;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 501;
 }
 .filter-chip {
   display: inline-flex;
@@ -336,18 +334,18 @@
   top: calc(100% + var(--space-2));
   left: 0;
   min-width: 240px;
-  max-height: 320px;
+  max-height: 340px;
   background: var(--color-surface);
   border: var(--border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
   overflow-y: auto;
   opacity: 0;
   transform: translateY(-4px);
   pointer-events: none;
   transition: opacity var(--duration-fast) var(--ease-out),
               transform var(--duration-fast) var(--ease-out);
-  z-index: 10;
+  z-index: 600;
 }
 .filter-dropdown.open {
   opacity: 1;
@@ -450,6 +448,29 @@
 }
 .deal-card:hover .deal-card-image img {
   transform: scale(1.06);
+}
+
+/* Image fallback placeholder */
+.deal-image-placeholder {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #111115 0%, #22222a 100%);
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  text-align: center;
+  z-index: 1;
+}
+.deal-image-placeholder.show-placeholder {
+  display: flex;
+}
+.placeholder-title {
+  font-family: var(--font-display);
+  font-size: var(--text-small);
+  font-weight: 700;
+  color: var(--color-bg);
+  line-height: 1.3;
 }
 
 /* Discount badge on card */

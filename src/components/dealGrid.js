@@ -3,7 +3,7 @@
    ============================================================ */
 
 import { $, el } from '../utils/dom.js';
-import { fetchDeals } from '../api/cheapshark.js';
+import { fetchDeals, deduplicateDeals } from '../api/cheapshark.js';
 import { createDealCard, createSkeletonCard } from './dealCard.js';
 
 let currentPage = 0;
@@ -71,7 +71,10 @@ async function loadDeals(showSkeleton = false) {
     if (currentFilters.upperPrice !== undefined && currentFilters.upperPrice !== null) params.upperPrice = currentFilters.upperPrice;
     if (currentFilters.title) params.title = currentFilters.title;
 
-    const deals = await fetchDeals(params);
+    const deals = await fetchDeals({
+      ...params,
+      pageSize: 48, // Fetch extra so deduplication still yields plenty of unique deals
+    });
 
     // Remove skeletons
     skeletons.forEach(s => s.remove());
@@ -86,10 +89,12 @@ async function loadDeals(showSkeleton = false) {
       return;
     }
 
+    // Deduplicate deals so the exact same title doesn't repeat 5 times from 5 different stores
+    let filteredDeals = deduplicateDeals(deals);
+
     // Filter by minimum savings if set
-    let filteredDeals = deals;
     if (currentFilters.minSavings) {
-      filteredDeals = deals.filter(d => parseFloat(d.savings) >= currentFilters.minSavings);
+      filteredDeals = filteredDeals.filter(d => parseFloat(d.savings) >= currentFilters.minSavings);
     }
 
     // Render cards

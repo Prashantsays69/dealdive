@@ -2,13 +2,16 @@
    Formatting Utilities
    ============================================================ */
 
+const USD_TO_INR = 83;
+
 /**
- * Format a price — $0 shows as "FREE"
+ * Format a price in INR (₹) — 0 shows as "FREE"
  */
 export function formatPrice(price) {
   const num = parseFloat(price);
   if (isNaN(num) || num === 0) return 'FREE';
-  return `$${num.toFixed(2)}`;
+  const inr = Math.round(num * USD_TO_INR);
+  return `₹${inr.toLocaleString('en-IN')}`;
 }
 
 /**
