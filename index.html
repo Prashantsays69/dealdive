@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DealDive — Game Deals Aggregator</title>
+  <meta name="description" content="Discover the best PC game deals across Steam, Epic, GOG and more. Compare prices, track discounts, and never overpay for games." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <script type="module" src="/src/main.js"></script>
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header id="site-header" class="header"></header>
+
+    <!-- Hero Carousel -->
+    <section id="hero" class="hero"></section>
+
+    <!-- Main Content -->
+    <main id="main-content" class="main">
+      <!-- Filter Bar -->
+      <div id="filter-bar" class="filter-bar"></div>
+
+      <!-- Deals Grid -->
+      <div id="deals-container" class="deals-container">
+        <div id="deals-grid" class="deals-grid"></div>
+        <div id="scroll-sentinel" class="scroll-sentinel"></div>
+      </div>
+    </main>
+
+    <!-- Search Modal -->
+    <div id="search-modal" class="search-modal" aria-hidden="true"></div>
+
+    <!-- Wishlist Panel -->
+    <div id="wishlist-panel" class="wishlist-panel" aria-hidden="true"></div>
+
+    <!-- Footer -->
+    <footer id="site-footer" class="footer"></footer>
+  </div>
+</body>
+</html>

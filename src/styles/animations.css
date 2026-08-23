@@ -1,0 +1,120 @@
+/* ============================================================
+   Animations & Micro-interactions
+   ============================================================ */
+
+/* Spin */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.skeleton-image::after,
+.skeleton-line::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--color-skeleton-shine) 50%,
+    transparent 100%
+  );
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
+/* Fade in up — card entry */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.deal-card {
+  animation: fadeInUp var(--duration-normal) var(--ease-out) both;
+}
+/* Stagger via inline style --delay */
+.deal-card[style*="--delay"] {
+  animation-delay: var(--delay);
+}
+
+/* Fade in — general */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Scale in */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Slide in right (wishlist panel) */
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+/* Heart pop */
+@keyframes heartPop {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.3); }
+  60% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+.deal-wishlist-btn.popping {
+  animation: heartPop 400ms var(--ease-out);
+}
+
+/* Dot pulse — hero auto-play indicator */
+@keyframes dotPulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+
+/* Count badge pop */
+@keyframes badgePop {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.wishlist-count {
+  animation: badgePop 300ms var(--ease-out);
+}
+
+/* Smooth image load */
+.deal-card-image img,
+.search-result-thumb,
+.wishlist-item-thumb {
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-out);
+}
+.deal-card-image img.loaded,
+.search-result-thumb.loaded,
+.wishlist-item-thumb.loaded {
+  opacity: 1;
+}
+
+/* Filter chip active pulse */
+@keyframes chipActivate {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+.filter-chip.just-activated {
+  animation: chipActivate 200ms var(--ease-out);
+}
