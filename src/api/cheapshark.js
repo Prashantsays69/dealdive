@@ -113,10 +113,38 @@ export async function fetchGameDetails(gameID) {
 }
 
 /**
- * Get the redirect URL for a deal (opens in CheapShark, then redirects to store)
+ * Get direct store URL for a game deal (bypasses CheapShark redirect)
+ * Redirects directly to Steam store, Epic Games store, GOG, etc.
  */
-export function getDealLink(dealID) {
-  return `https://www.cheapshark.com/redirect?dealID=${dealID}`;
+export function getDealLink(deal) {
+  if (!deal) return '#';
+  
+  // If deal is string (dealID passed for backwards compat)
+  if (typeof deal === 'string') {
+    return `https://www.cheapshark.com/redirect?dealID=${deal}`;
+  }
+
+  // Direct Steam Store link
+  if (deal.steamAppID) {
+    return `https://store.steampowered.com/app/${deal.steamAppID}/`;
+  }
+
+  // Direct Epic Games Store link (storeID === '25')
+  if (deal.storeID === '25') {
+    return `https://store.epicgames.com/en-US/browse?q=${encodeURIComponent(deal.title)}`;
+  }
+
+  // Direct GOG Store link (storeID === '7')
+  if (deal.storeID === '7') {
+    return `https://www.gog.com/en/games?query=${encodeURIComponent(deal.title)}`;
+  }
+
+  // Fallback to CheapShark redirect link
+  if (deal.dealID) {
+    return `https://www.cheapshark.com/redirect?dealID=${deal.dealID}`;
+  }
+
+  return `https://store.steampowered.com/search/?term=${encodeURIComponent(deal.title)}`;
 }
 
 /**

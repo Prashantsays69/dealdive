@@ -15,8 +15,8 @@ export function initHeader({ onSearchClick, onWishlistClick }) {
 
       <nav class="header-nav" id="header-nav">
         <a href="#" class="active" data-nav="deals">Deals</a>
+        <a href="#" data-nav="popular">Popular Games</a>
         <a href="#" data-nav="free">Free Games</a>
-        <a href="#" data-nav="stores">Stores</a>
       </nav>
 
       <div class="header-actions">

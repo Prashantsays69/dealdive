@@ -191,7 +191,7 @@ function renderWishlistPanel() {
     // Click to open deal
     itemEl.addEventListener('click', (e) => {
       if (e.target.closest('.wishlist-item-remove')) return;
-      window.open(getDealLink(item.dealID), '_blank', 'noopener,noreferrer');
+      window.open(getDealLink(item), '_blank', 'noopener,noreferrer');
     });
     itemEl.style.cursor = 'pointer';
 

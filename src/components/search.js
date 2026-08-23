@@ -69,7 +69,9 @@ export function initSearch() {
           </div>
         `;
         item.addEventListener('click', () => {
-          if (game.cheapestDealID) {
+          if (game.steamAppID) {
+            window.open(`https://store.steampowered.com/app/${game.steamAppID}/`, '_blank', 'noopener,noreferrer');
+          } else if (game.cheapestDealID) {
             window.open(getDealLink(game.cheapestDealID), '_blank', 'noopener,noreferrer');
           }
         });

@@ -60,7 +60,7 @@ function renderHero(container, deals, storesMap) {
           <span class="hero-price-current">${formatPrice(deal.salePrice)}</span>
           ${normalPrice > salePrice ? `<span class="hero-price-original">${formatPrice(deal.normalPrice)}</span>` : ''}
         </div>
-        <a href="${getDealLink(deal.dealID)}" target="_blank" rel="noopener noreferrer" class="hero-cta" style="margin-top: var(--space-4);">
+        <a href="${getDealLink(deal)}" target="_blank" rel="noopener noreferrer" class="hero-cta" style="margin-top: var(--space-4);">
           View Deal ${icons.arrowRight}
         </a>
       </div>
