@@ -49,10 +49,10 @@ async function init() {
     },
   });
 
-  // 5. Init deal grid
+  // 5. Init deal grid with Steam ('1') as default store
   initDealGrid({
     stores,
-    filters: { sortBy: 'Deal Rating', onSale: true },
+    filters: { storeID: '1', sortBy: 'Deal Rating', onSale: true },
   });
 
   // 6. Init search

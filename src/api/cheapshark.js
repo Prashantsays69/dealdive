@@ -72,10 +72,27 @@ export async function fetchDealDetails(dealID) {
  * Fetch all stores
  * Returns array of { storeID, storeName, isActive, images: { banner, logo, icon } }
  */
+/**
+ * Fetch all stores
+ * Returns array of { storeID, storeName, isActive, images: { banner, logo, icon } }
+ * Prioritizes Steam (1) and Epic Games Store (25) at the top
+ */
 export async function fetchStores() {
   const stores = await request('/stores');
-  // Only return active stores
-  return stores.filter(s => s.isActive === 1);
+  const activeStores = stores.filter(s => s.isActive === 1);
+
+  // Priority stores for PC gamers: Steam (1), Epic Games (25), GOG (7), Ubisoft (13)
+  const priorityIDs = ['1', '25', '7', '13'];
+  activeStores.sort((a, b) => {
+    const idxA = priorityIDs.indexOf(a.storeID);
+    const idxB = priorityIDs.indexOf(b.storeID);
+    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+    if (idxA !== -1) return -1;
+    if (idxB !== -1) return 1;
+    return a.storeName.localeCompare(b.storeName);
+  });
+
+  return activeStores;
 }
 
 /**
@@ -142,7 +159,6 @@ export function deduplicateDeals(deals) {
   const seenTitles = new Map();
 
   deals.forEach(deal => {
-    // Normalize title to group editions (e.g. "Suicide Squad: Kill the Justice League", "Suicide Squad Deluxe")
     const cleanTitle = deal.title
       .toLowerCase()
       .replace(/\b(deluxe|ultimate|gold|edition|goty|bundle|standard)\b/g, '')
@@ -152,7 +168,6 @@ export function deduplicateDeals(deals) {
     if (!seenTitles.has(cleanTitle)) {
       seenTitles.set(cleanTitle, deal);
     } else {
-      // If current deal has higher savings, replace the stored deal
       const existing = seenTitles.get(cleanTitle);
       if (parseFloat(deal.savings) > parseFloat(existing.savings)) {
         seenTitles.set(cleanTitle, deal);
@@ -164,44 +179,41 @@ export function deduplicateDeals(deals) {
 }
 
 /**
- * Fetch top popular deals for Hero Carousel
- * Filters for high-metacritic / well-known titles with high-res artwork
+ * Fetch top iconic popular deals of all time for Hero Carousel
+ * Prioritizes Steam (1) and Epic Games Store (25) with top Metacritic (>= 75)
  */
 export async function fetchHeroDeals() {
   try {
-    // Attempt 1: Fetch deals with Metacritic >= 70
+    // Primary query: Steam & Epic Games deals sorted by Metacritic score
     let deals = await fetchDeals({
-      pageSize: 40,
-      sortBy: 'Deal Rating',
+      pageSize: 50,
+      sortBy: 'Metacritic',
       onSale: true,
-      metacritic: 70,
+      metacritic: 75,
+      storeID: '1,25', // Steam & Epic Games
     });
 
-    // Deduplicate deals
-    let uniqueDeals = deduplicateDeals(deals);
+    let uniqueDeals = deduplicateDeals(deals).filter(d => d.steamAppID);
 
-    // Filter to only deals that have a Steam App ID (guarantees high quality artwork)
-    let heroDeals = uniqueDeals.filter(d => d.steamAppID && parseInt(d.metacriticScore) >= 70);
-
-    // Fallback if not enough games match Metacritic >= 70
-    if (heroDeals.length < 5) {
-      const fallbackDeals = await fetchDeals({
-        pageSize: 40,
-        sortBy: 'Deal Rating',
+    // Fallback query if Steam/Epic specific search yields fewer than 5 items
+    if (uniqueDeals.length < 5) {
+      const globalDeals = await fetchDeals({
+        pageSize: 50,
+        sortBy: 'Metacritic',
         onSale: true,
-        steamRating: 75,
+        metacritic: 75,
       });
-      const uniqueFallback = deduplicateDeals(fallbackDeals).filter(d => d.steamAppID);
+      const globalUnique = deduplicateDeals(globalDeals).filter(d => d.steamAppID);
       
       const set = new Map();
-      [...heroDeals, ...uniqueFallback].forEach(d => set.set(d.dealID, d));
-      heroDeals = Array.from(set.values());
+      [...uniqueDeals, ...globalUnique].forEach(d => set.set(d.dealID, d));
+      uniqueDeals = Array.from(set.values());
     }
 
-    // Sort by Metacritic score descending
-    heroDeals.sort((a, b) => (parseInt(b.metacriticScore) || 0) - (parseInt(a.metacriticScore) || 0));
+    // Sort by Metacritic rating descending so highest rated popular games appear first
+    uniqueDeals.sort((a, b) => (parseInt(b.metacriticScore) || 0) - (parseInt(a.metacriticScore) || 0));
 
-    return heroDeals.slice(0, 5);
+    return uniqueDeals.slice(0, 5);
   } catch (err) {
     console.error('Failed to fetch hero deals:', err);
     return [];

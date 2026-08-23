@@ -2,12 +2,19 @@
    Base Styles — Global typography, body, scrollbar
    ============================================================ */
 
-body {
+html, body {
   font-family: var(--font-body);
   font-size: var(--text-body);
   color: var(--color-text);
   background-color: var(--color-bg);
   letter-spacing: var(--tracking-normal);
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+#app {
+  width: 100%;
+  max-width: 100%;
   overflow-x: hidden;
 }
 

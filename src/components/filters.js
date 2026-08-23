@@ -5,7 +5,7 @@
 import { $, el, icons } from '../utils/dom.js';
 
 let activeFilters = {
-  storeID: null,
+  storeID: '1', // Steam as default highlighted store on entry
   sortBy: 'Deal Rating',
   lowerPrice: null,
   upperPrice: null,
@@ -58,7 +58,10 @@ export function initFilters({ stores, onChange }) {
 function renderFilterBar(container, stores) {
   const inner = el('div', { class: 'filter-bar-inner' });
 
-  // Store filter
+  // Store filter — default to Steam ('1')
+  const steamStore = stores.find(s => s.storeID === '1');
+  const initialStoreLabel = steamStore ? steamStore.storeName : 'Steam';
+
   inner.appendChild(createDropdownFilter('Store', 'store-filter', stores.map(s => ({
     value: s.storeID,
     label: s.storeName,
@@ -66,7 +69,7 @@ function renderFilterBar(container, stores) {
   })), (selected) => {
     activeFilters.storeID = selected || null;
     emitChange();
-  }));
+  }, '1'));
 
   inner.appendChild(el('div', { class: 'filter-divider' }));
 
