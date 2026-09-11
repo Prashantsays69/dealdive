@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="gl-on">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
@@ -7,56 +7,76 @@
   <meta name="description" content="Discover the best PC game deals across Steam, Epic, GOG and more. Compare prices, track discounts, and never overpay for games." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <script type="module" src="/src/main.js"></script>
 </head>
 <body>
-  <!-- Three.js WebGL Canvas (injected by scene3d.js, fallback anchor) -->
-  <canvas id="three-canvas"></canvas>
+  <!-- Scroll Progress Bar -->
+  <div class="progress" id="scroll-progress" aria-hidden="true"></div>
 
-  <div id="app">
-    <!-- Header — floating minimal navbar -->
-    <header id="site-header" class="header"></header>
+  <!-- Subtle Film Grain Overlay -->
+  <div class="grain" aria-hidden="true"></div>
 
-    <!-- Hero — Full-screen 3D cinematic -->
-    <section id="hero-3d" class="hero3d immersive-section"></section>
+  <!-- Three.js WebGL Canvas -->
+  <canvas id="gl" aria-hidden="true"></canvas>
 
-    <!-- Featured Games — Scroll-driven cinematic scenes -->
-    <section id="featured-games" class="featured-games immersive-section"></section>
+  <!-- AMIX-style Minimal Navigation -->
+  <header class="site-head" id="site-header"></header>
 
-    <!-- Best Deals Gallery — Horizontal 3D gallery -->
-    <section id="best-deals-gallery" class="best-deals-gallery immersive-section"></section>
+  <div class="content" id="content">
+    <!-- HERO: Full-screen 3D entrance -->
+    <section class="section hero" id="hero" data-cam="hero"></section>
 
-    <!-- Platform Section — Interactive store tiles -->
-    <section id="platform-section" class="platform-section immersive-section"></section>
+    <!-- DEAL 01: Viewport scene -->
+    <section class="section deal-section" id="deal-01" data-cam="deal-01" data-deal-index="0"></section>
 
-    <!-- Trending Cards — Layered 3D cards -->
-    <section id="trending-cards" class="trending-cards immersive-section"></section>
+    <!-- DEAL 02: Viewport scene -->
+    <section class="section deal-section" id="deal-02" data-cam="deal-02" data-deal-index="1"></section>
 
-    <!-- CTA Section -->
-    <section id="cta-section" class="cta-section immersive-section"></section>
+    <!-- DEAL 03: Viewport scene -->
+    <section class="section deal-section" id="deal-03" data-cam="deal-03" data-deal-index="2"></section>
 
-    <!-- Main Content — Filter Bar + Deals Grid (preserved) -->
-    <main id="main-content" class="main">
-      <!-- Filter Bar -->
-      <div id="filter-bar" class="filter-bar"></div>
+    <!-- DEAL 04: Viewport scene -->
+    <section class="section deal-section" id="deal-04" data-cam="deal-04" data-deal-index="3"></section>
 
-      <!-- Deals Grid -->
-      <div id="deals-container" class="deals-container">
-        <div id="deals-grid" class="deals-grid"></div>
-        <div id="scroll-sentinel" class="scroll-sentinel"></div>
+    <!-- TRENDING: Layered 3D cards -->
+    <section class="section trending-section" id="trending" data-cam="trending"></section>
+
+    <!-- STORES: Platform showcase -->
+    <section class="section stores-section" id="stores" data-cam="stores"></section>
+
+    <!-- CATALOG: Complete DealDive deals explorer & filters (Preserved functionality) -->
+    <section class="section catalog-section" id="catalog" data-cam="catalog">
+      <div class="catalog-inner">
+        <div class="catalog-header">
+          <div class="meta-label">CATALOG &amp; FILTER // ALL STORES</div>
+          <h2 class="catalog-title">Explore All Game Deals</h2>
+          <p class="catalog-sub">Real-time prices from Steam, Epic, GOG, and verified storefronts. Filter by price, rating, or store.</p>
+        </div>
+
+        <!-- Filter Bar -->
+        <div id="filter-bar" class="filter-bar"></div>
+
+        <!-- Deals Grid -->
+        <div id="deals-container" class="deals-container">
+          <div id="deals-grid" class="deals-grid"></div>
+          <div id="scroll-sentinel" class="scroll-sentinel"></div>
+        </div>
       </div>
-    </main>
+    </section>
 
-    <!-- Search Modal -->
-    <div id="search-modal" class="search-modal" aria-hidden="true"></div>
+    <!-- FINAL CTA: Landmark banner -->
+    <section class="section cta-section" id="cta" data-cam="cta"></section>
 
-    <!-- Wishlist Panel -->
-    <div id="wishlist-panel" class="wishlist-panel" aria-hidden="true"></div>
-
-    <!-- Footer -->
-    <footer id="site-footer" class="footer"></footer>
+    <!-- FOOTER: AMIX-style minimal footer -->
+    <footer class="section site-foot" id="foot" data-cam="foot"></footer>
   </div>
+
+  <!-- Search Modal -->
+  <div id="search-modal" class="search-modal" aria-hidden="true"></div>
+
+  <!-- Wishlist Panel -->
+  <div id="wishlist-panel" class="wishlist-panel" aria-hidden="true"></div>
 </body>
 </html>

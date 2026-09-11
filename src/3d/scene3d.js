@@ -1,189 +1,365 @@
 /* ============================================================
-   Scene3D — Core Three.js Scene Manager
-   Manages a single full-viewport WebGL canvas behind all HTML.
-   Provides scroll-driven camera, mouse parallax, and section
-   registration for immersive 3D effects.
+   DealDive — Core Three.js Scene Engine (AMIX Architecture)
+   Implements scroll-driven 3D camera choreography, keyframe
+   lerping, mouse parallax depth, and 3D deal showcases.
    ============================================================ */
 
 import * as THREE from 'three';
 
-let scene, camera, renderer, canvas;
-let mouseX = 0, mouseY = 0;
-let targetMouseX = 0, targetMouseY = 0;
-let scrollProgress = 0;
-let targetScrollProgress = 0;
-let isLowPerf = false;
+let canvas, renderer, scene, camera, clock;
+let inited = false;
+let running = false;
 let animationId = null;
-let registeredSections = [];
-let ambientObjects = [];
-let clock;
-let isInitialized = false;
 
-/**
- * Detect if device is low-performance
- */
-function detectPerformance() {
-  const cores = navigator.hardwareConcurrency || 2;
-  const dpr = window.devicePixelRatio || 1;
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  const isLowRes = window.innerWidth < 768;
-  
-  // Low perf: mobile with fewer than 4 cores, or very low-res
-  return (isMobile && cores < 4) || (isLowRes && cores < 4) || (dpr < 1);
+// Devices & State
+const isMobile = window.innerWidth <= 768;
+let glOn = true;
+
+// Camera poses mapped by section data-cam
+let camPoses = {};
+let keyframes = [];
+
+const camState = {
+  pos: new THREE.Vector3(0, 1.4, 10),
+  look: new THREE.Vector3(0, 1.0, -5),
+  targetPos: new THREE.Vector3(0, 1.4, 10),
+  targetLook: new THREE.Vector3(0, 1.0, -5),
+  mouse: new THREE.Vector2(0, 0),
+  mouseSmooth: new THREE.Vector2(0, 0),
+  lerpSpeed: 0.055,
+};
+
+// Registered 3D meshes for deals, trending, etc.
+let dealMeshes = [];
+let ambientParticles = null;
+let landmarkSign = null;
+
+/* ---------- Progress Bar ---------- */
+let progressBar = null;
+function updateProgress() {
+  if (!progressBar) progressBar = document.getElementById('scroll-progress');
+  if (!progressBar) return;
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  const p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+  progressBar.style.transform = `scaleX(${p})`;
 }
 
-/**
- * Initialize the 3D scene
- */
-export function initScene3D() {
-  isLowPerf = detectPerformance();
-  
-  if (isLowPerf) {
-    document.body.classList.add('no-webgl');
+/* ---------- Texture Helper ---------- */
+function makeGlowTexture(colorHex) {
+  const c = document.createElement('canvas');
+  c.width = 128;
+  c.height = 128;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+  g.addColorStop(0, colorHex);
+  g.addColorStop(0.35, colorHex + 'aa');
+  g.addColorStop(1, '#00000000');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 128, 128);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+function makeCanvasTexture(w, h, draw) {
+  const c = document.createElement('canvas');
+  c.width = w;
+  c.height = h;
+  draw(c.getContext('2d'), w, h);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 4;
+  return tex;
+}
+
+/* ---------- Landmark Sign ---------- */
+function createLandmarkSign(zPos) {
+  const signCanvas = document.createElement('canvas');
+  signCanvas.width = 2048;
+  signCanvas.height = 512;
+  const ctx = signCanvas.getContext('2d');
+
+  ctx.fillStyle = 'rgba(8, 8, 8, 0)';
+  ctx.fillRect(0, 0, 2048, 512);
+
+  // Glow text
+  ctx.textAlign = 'center';
+  ctx.shadowColor = '#C8FF3D';
+  ctx.shadowBlur = 40;
+  ctx.fillStyle = '#C8FF3D';
+  ctx.font = '900 130px Inter, sans-serif';
+  ctx.fillText('DEALDIVE', 1024, 220);
+
+  ctx.shadowBlur = 20;
+  ctx.fillStyle = '#F2F0EA';
+  ctx.font = '700 48px Space Mono, monospace';
+  ctx.letterSpacing = '10px';
+  ctx.fillText('NEVER OVERPAY FOR GAMES', 1024, 320);
+
+  const signTex = new THREE.CanvasTexture(signCanvas);
+  signTex.colorSpace = THREE.SRGBColorSpace;
+
+  const geo = new THREE.PlaneGeometry(16, 4);
+  const mat = new THREE.MeshBasicMaterial({
+    map: signTex,
+    transparent: true,
+    opacity: 0.9,
+    depthWrite: false,
+  });
+
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(0, 5.0, zPos);
+  return mesh;
+}
+
+/* ---------- 3D Deal Composition Builder ---------- */
+export function buildDealComposition(deal, index, imageUrl) {
+  const group = new THREE.Group();
+  const side = index % 2 === 0 ? 1 : -1;
+  const z = -8 - index * 9; // Spaced along Z axis
+
+  // 1. Shadow Ground
+  const shadowGeo = new THREE.PlaneGeometry(5.5, 3.2);
+  const shadowMat = new THREE.MeshBasicMaterial({
+    map: makeGlowTexture('#000000'),
+    transparent: true,
+    opacity: 0.65,
+    depthWrite: false,
+  });
+  const shadow = new THREE.Mesh(shadowGeo, shadowMat);
+  shadow.rotation.x = -Math.PI / 2;
+  shadow.position.set(0, -1.6, 0.4);
+  group.add(shadow);
+
+  // 2. Beveled Backing Frame
+  const frameGeo = new THREE.BoxGeometry(4.4, 2.5, 0.22);
+  const frameMat = new THREE.MeshStandardMaterial({
+    color: 0x141414,
+    metalness: 0.8,
+    roughness: 0.35,
+  });
+  const frame = new THREE.Mesh(frameGeo, frameMat);
+  frame.position.set(0, 0, 0);
+  group.add(frame);
+
+  // 3. Glowing Accent Rim (#C8FF3D)
+  const rimGeo = new THREE.BoxGeometry(4.48, 2.58, 0.05);
+  const rimMat = new THREE.MeshBasicMaterial({
+    color: 0xC8FF3D,
+    transparent: true,
+    opacity: 0.8,
+  });
+  const rim = new THREE.Mesh(rimGeo, rimMat);
+  rim.position.set(0, 0, -0.05);
+  group.add(rim);
+
+  // 4. Subtle Backlight Glow
+  const glowGeo = new THREE.PlaneGeometry(6.5, 4.2);
+  const glowMat = new THREE.MeshBasicMaterial({
+    map: makeGlowTexture('#C8FF3D'),
+    color: 0xC8FF3D,
+    transparent: true,
+    opacity: 0.22,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
+  const glow = new THREE.Mesh(glowGeo, glowMat);
+  glow.position.set(0, 0, -0.1);
+  group.add(glow);
+
+  // 5. Artwork Screen (Textured Plane)
+  const screenGeo = new THREE.PlaneGeometry(4.2, 2.3);
+  const screenMat = new THREE.MeshBasicMaterial({
+    color: 0x222222,
+  });
+
+  const screen = new THREE.Mesh(screenGeo, screenMat);
+  screen.position.set(0, 0, 0.12);
+  group.add(screen);
+
+  // Load Image Texture
+  if (imageUrl) {
+    const loader = new THREE.TextureLoader();
+    loader.crossOrigin = 'anonymous';
+    loader.load(
+      imageUrl,
+      (tex) => {
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.anisotropy = 4;
+        screen.material = new THREE.MeshBasicMaterial({
+          map: tex,
+        });
+      },
+      undefined,
+      (err) => {
+        console.warn('Failed to load 3D texture for deal:', deal.title, err);
+      }
+    );
+  }
+
+  // Positioning
+  const xOffset = isMobile ? 0 : side * 2.8;
+  const yOffset = isMobile ? 1.0 : 0.6;
+  const rotY = isMobile ? 0 : -side * 0.35;
+  const rotX = 0.04;
+
+  group.position.set(xOffset, yOffset, z);
+  group.rotation.set(rotX, rotY, 0);
+
+  group.userData = {
+    index,
+    side,
+    baseZ: z,
+    baseRotY: rotY,
+    floatSpeed: 0.8 + index * 0.2,
+    floatOffset: index * 1.5,
+  };
+
+  scene.add(group);
+  dealMeshes.push(group);
+
+  return group;
+}
+
+/* ---------- Camera Choreography ---------- */
+function buildCamPoses() {
+  const zLast = -62;
+
+  if (isMobile) {
+    camPoses = {
+      hero: { pos: new THREE.Vector3(0, 1.2, 7.5), look: new THREE.Vector3(0, 1.0, -6) },
+      'deal-01': { pos: new THREE.Vector3(0, 2.2, -4.5), look: new THREE.Vector3(0, 0.6, -8.5) },
+      'deal-02': { pos: new THREE.Vector3(0, 2.2, -13.5), look: new THREE.Vector3(0, 0.6, -17.5) },
+      'deal-03': { pos: new THREE.Vector3(0, 2.2, -22.5), look: new THREE.Vector3(0, 0.6, -26.5) },
+      'deal-04': { pos: new THREE.Vector3(0, 2.2, -31.5), look: new THREE.Vector3(0, 0.6, -35.5) },
+      trending: { pos: new THREE.Vector3(0, 2.5, -39.0), look: new THREE.Vector3(0, 0.8, -44.0) },
+      stores: { pos: new THREE.Vector3(0, 2.0, -47.0), look: new THREE.Vector3(0, 0.5, -51.0) },
+      catalog: { pos: new THREE.Vector3(0, 1.5, -53.0), look: new THREE.Vector3(0, 0.5, -59.0) },
+      cta: { pos: new THREE.Vector3(0, 2.8, -58.0), look: new THREE.Vector3(0, 2.0, -65.0) },
+      foot: { pos: new THREE.Vector3(0, 3.5, -60.0), look: new THREE.Vector3(0, 3.0, -68.0) },
+    };
     return;
   }
 
-  clock = new THREE.Clock();
+  // Desktop Cinematic Angles (AMIX style alternating perspective)
+  camPoses = {
+    hero: { pos: new THREE.Vector3(0, 1.4, 8.5), look: new THREE.Vector3(0, 1.0, -5.0) },
+    'deal-01': { pos: new THREE.Vector3(-1.8, 1.3, -4.5), look: new THREE.Vector3(2.4, 0.8, -8.5) },
+    'deal-02': { pos: new THREE.Vector3(1.8, 1.3, -13.5), look: new THREE.Vector3(-2.4, 0.8, -17.5) },
+    'deal-03': { pos: new THREE.Vector3(-1.9, 1.5, -22.5), look: new THREE.Vector3(2.4, 0.7, -26.5) },
+    'deal-04': { pos: new THREE.Vector3(1.8, 1.3, -31.5), look: new THREE.Vector3(-2.4, 0.8, -35.5) },
+    trending: { pos: new THREE.Vector3(0, 3.2, -37.5), look: new THREE.Vector3(0, 0.6, -44.0) },
+    stores: { pos: new THREE.Vector3(0, 2.2, -46.5), look: new THREE.Vector3(0, 0.8, -52.0) },
+    catalog: { pos: new THREE.Vector3(0, 1.2, -53.0), look: new THREE.Vector3(0, 0.6, -58.0) },
+    cta: { pos: new THREE.Vector3(0, 4.0, -58.0), look: new THREE.Vector3(0, 4.5, -66.0) },
+    foot: { pos: new THREE.Vector3(0, 4.5, -59.0), look: new THREE.Vector3(0, 4.8, -68.0) },
+  };
+}
 
-  // Create canvas
-  canvas = document.getElementById('three-canvas');
-  if (!canvas) {
-    canvas = document.createElement('canvas');
-    canvas.id = 'three-canvas';
-    document.body.prepend(canvas);
+export function measureKeyframes() {
+  keyframes = [];
+  document.querySelectorAll('.section').forEach((sec) => {
+    const kind = sec.dataset.cam;
+    const pose = camPoses[kind];
+    if (!pose) return;
+    const rect = sec.getBoundingClientRect();
+    keyframes.push({
+      id: kind,
+      center: rect.top + window.scrollY + rect.height / 2,
+      pose,
+    });
+  });
+
+  keyframes.sort((a, b) => a.center - b.center);
+}
+
+function smoothstep(t) {
+  return t * t * (3 - 2 * t);
+}
+
+function poseAtScroll() {
+  if (!keyframes.length) return;
+  const y = window.scrollY + window.innerHeight / 2;
+
+  let a = keyframes[0];
+  let b = keyframes[0];
+
+  for (let i = 0; i < keyframes.length; i++) {
+    if (keyframes[i].center <= y) {
+      a = keyframes[i];
+      b = keyframes[Math.min(i + 1, keyframes.length - 1)];
+    }
   }
 
-  // Scene
-  scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x080808, 0.035);
+  const span = Math.max(1, b.center - a.center);
+  const t = smoothstep(Math.min(1, Math.max(0, (y - a.center) / span)));
 
-  // Camera
-  camera = new THREE.PerspectiveCamera(
-    60,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    100
-  );
-  camera.position.set(0, 0, 5);
+  camState.targetPos.lerpVectors(a.pose.pos, b.pose.pos, t);
+  camState.targetLook.lerpVectors(a.pose.look, b.pose.look, t);
+}
 
-  // Renderer
-  renderer = new THREE.WebGLRenderer({
-    canvas,
-    antialias: true,
-    alpha: true,
-    powerPreference: 'high-performance',
-  });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setClearColor(0x080808, 1);
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.2;
+/* ---------- Setup Lights & Environment ---------- */
+function setupEnvironment() {
+  // Ambient & Hemisphere
+  const hemi = new THREE.HemisphereLight(0x181a20, 0x080808, 1.2);
+  scene.add(hemi);
 
-  // Style canvas
-  canvas.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: -1;
-    pointer-events: none;
-  `;
+  // Key light with subtle warm tint
+  const keyLight = new THREE.DirectionalLight(0xF2F0EA, 1.4);
+  keyLight.position.set(-6, 12, 10);
+  scene.add(keyLight);
 
-  // Lights
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-  scene.add(ambientLight);
-
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
-  directionalLight.position.set(5, 5, 5);
-  scene.add(directionalLight);
-
-  // Subtle accent-colored point light
-  const accentLight = new THREE.PointLight(0xC8FF3D, 0.3, 30);
-  accentLight.position.set(-3, 2, 3);
+  // Accent light in #C8FF3D
+  const accentLight = new THREE.PointLight(0xC8FF3D, 25, 45);
+  accentLight.position.set(4, 6, -10);
   scene.add(accentLight);
 
-  // Create ambient floating geometry
-  createAmbientGeometry();
+  const accentLight2 = new THREE.PointLight(0xC8FF3D, 20, 45);
+  accentLight2.position.set(-4, 6, -30);
+  scene.add(accentLight2);
 
-  // Events
-  window.addEventListener('mousemove', onMouseMove, { passive: true });
-  window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('resize', onResize);
+  // Ambient floating dust particles
+  const pCount = isMobile ? 120 : 350;
+  const pGeo = new THREE.BufferGeometry();
+  const pos = new Float32Array(pCount * 3);
 
-  isInitialized = true;
-
-  // Start render loop
-  animate();
-}
-
-/**
- * Create ambient floating wireframe geometry in deep background
- */
-function createAmbientGeometry() {
-  const geometries = [
-    new THREE.IcosahedronGeometry(0.6, 1),
-    new THREE.OctahedronGeometry(0.5, 0),
-    new THREE.TorusGeometry(0.4, 0.15, 8, 6),
-    new THREE.TetrahedronGeometry(0.4, 0),
-    new THREE.IcosahedronGeometry(0.3, 0),
-    new THREE.DodecahedronGeometry(0.35, 0),
-    new THREE.OctahedronGeometry(0.4, 0),
-    new THREE.TorusKnotGeometry(0.25, 0.08, 32, 4, 2, 3),
-  ];
-
-  const material = new THREE.MeshBasicMaterial({
-    color: 0xC8FF3D,
-    wireframe: true,
-    transparent: true,
-    opacity: 0.06,
-  });
-
-  const materialDim = new THREE.MeshBasicMaterial({
-    color: 0xffffff,
-    wireframe: true,
-    transparent: true,
-    opacity: 0.03,
-  });
-
-  for (let i = 0; i < 12; i++) {
-    const geo = geometries[i % geometries.length];
-    const mat = i % 3 === 0 ? material : materialDim;
-    const mesh = new THREE.Mesh(geo, mat.clone());
-
-    mesh.position.set(
-      (Math.random() - 0.5) * 20,
-      (Math.random() - 0.5) * 40,
-      -5 - Math.random() * 15
-    );
-    mesh.rotation.set(
-      Math.random() * Math.PI,
-      Math.random() * Math.PI,
-      Math.random() * Math.PI
-    );
-
-    mesh.userData.rotSpeed = {
-      x: (Math.random() - 0.5) * 0.003,
-      y: (Math.random() - 0.5) * 0.003,
-      z: (Math.random() - 0.5) * 0.002,
-    };
-    mesh.userData.floatSpeed = 0.2 + Math.random() * 0.3;
-    mesh.userData.floatOffset = Math.random() * Math.PI * 2;
-    mesh.userData.baseY = mesh.position.y;
-
-    scene.add(mesh);
-    ambientObjects.push(mesh);
+  for (let i = 0; i < pCount; i++) {
+    pos[i * 3] = (Math.random() - 0.5) * 30;
+    pos[i * 3 + 1] = Math.random() * 10 - 2;
+    pos[i * 3 + 2] = 12 - Math.random() * 80;
   }
+  pGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+
+  const pMat = new THREE.PointsMaterial({
+    size: 0.05,
+    color: 0xC8FF3D,
+    transparent: true,
+    opacity: 0.45,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
+  ambientParticles = new THREE.Points(pGeo, pMat);
+  scene.add(ambientParticles);
+
+  // Ground Grid Matrix
+  const gridHelper = new THREE.GridHelper(90, 45, 0x222222, 0x111111);
+  gridHelper.position.set(0, -2.2, -30);
+  scene.add(gridHelper);
+
+  // Landmark Sign
+  landmarkSign = createLandmarkSign(-64);
+  scene.add(landmarkSign);
 }
 
+/* ---------- Input Listeners ---------- */
 function onMouseMove(e) {
-  targetMouseX = (e.clientX / window.innerWidth) * 2 - 1;
-  targetMouseY = (e.clientY / window.innerHeight) * 2 - 1;
+  camState.mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+  camState.mouse.y = (e.clientY / window.innerHeight) * 2 - 1;
 }
 
 function onScroll() {
-  const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-  targetScrollProgress = maxScroll > 0 ? window.scrollY / maxScroll : 0;
+  updateProgress();
+  poseAtScroll();
 }
 
 function onResize() {
@@ -191,138 +367,138 @@ function onResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+  buildCamPoses();
+  measureKeyframes();
+  poseAtScroll();
 }
 
-/**
- * Main animation loop
- */
+/* ---------- Main Animation Loop ---------- */
 function animate() {
   animationId = requestAnimationFrame(animate);
 
-  if (!renderer || !scene || !camera) return;
+  if (!renderer || !scene || !camera || !glOn) return;
 
-  const delta = clock.getDelta();
-  const elapsed = clock.getElapsedTime();
+  const elapsed = clock ? clock.getElapsedTime() : 0;
 
-  // Smooth mouse follow
-  mouseX += (targetMouseX - mouseX) * 0.05;
-  mouseY += (targetMouseY - mouseY) * 0.05;
+  // Smooth mouse lerp
+  camState.mouseSmooth.x += (camState.mouse.x - camState.mouseSmooth.x) * 0.05;
+  camState.mouseSmooth.y += (camState.mouse.y - camState.mouseSmooth.y) * 0.05;
 
-  // Smooth scroll follow
-  scrollProgress += (targetScrollProgress - scrollProgress) * 0.08;
+  // Camera lerp to target
+  camState.pos.lerp(camState.targetPos, camState.lerpSpeed);
+  camState.look.lerp(camState.targetLook, camState.lerpSpeed);
 
-  // Camera subtle mouse parallax
-  camera.position.x = mouseX * 0.3;
-  camera.position.y = -mouseY * 0.2;
-  camera.lookAt(0, 0, 0);
+  // Parallax applied to camera
+  const parallaxX = camState.mouseSmooth.x * (isMobile ? 0.2 : 0.45);
+  const parallaxY = -camState.mouseSmooth.y * (isMobile ? 0.15 : 0.35);
 
-  // Animate ambient geometry
-  ambientObjects.forEach((obj) => {
-    obj.rotation.x += obj.userData.rotSpeed.x;
-    obj.rotation.y += obj.userData.rotSpeed.y;
-    obj.rotation.z += obj.userData.rotSpeed.z;
+  camera.position.set(
+    camState.pos.x + parallaxX,
+    camState.pos.y + parallaxY,
+    camState.pos.z
+  );
 
-    // Gentle float
-    obj.position.y = obj.userData.baseY +
-      Math.sin(elapsed * obj.userData.floatSpeed + obj.userData.floatOffset) * 0.3;
+  camera.lookAt(
+    camState.look.x + parallaxX * 0.5,
+    camState.look.y + parallaxY * 0.5,
+    camState.look.z
+  );
+
+  // Animate 3D deal meshes (gentle hovering & parallax response)
+  dealMeshes.forEach((mesh) => {
+    const { floatSpeed, floatOffset, baseRotY } = mesh.userData;
+    mesh.position.y += Math.sin(elapsed * floatSpeed + floatOffset) * 0.0015;
+    mesh.rotation.y = baseRotY + camState.mouseSmooth.x * 0.08;
+    mesh.rotation.x = 0.04 - camState.mouseSmooth.y * 0.06;
   });
 
-  // Update registered sections
-  registeredSections.forEach(section => {
-    if (section.update) {
-      section.update(scrollProgress, mouseX, mouseY, elapsed);
-    }
-  });
+  // Slow particle drift
+  if (ambientParticles) {
+    ambientParticles.rotation.y = elapsed * 0.015;
+  }
 
   renderer.render(scene, camera);
 }
 
-/**
- * Register a section's 3D objects and update callback
- */
-export function registerSection(config) {
-  registeredSections.push(config);
+/* ---------- Initialization ---------- */
+export function initScene3D() {
+  if (inited) return;
+  inited = true;
+
+  canvas = document.getElementById('gl');
+  if (!canvas) {
+    canvas = document.createElement('canvas');
+    canvas.id = 'gl';
+    document.body.prepend(canvas);
+  }
+
+  clock = new THREE.Clock();
+
+  // Renderer
+  renderer = new THREE.WebGLRenderer({
+    canvas,
+    antialias: !isMobile,
+    powerPreference: 'high-performance',
+    alpha: true,
+  });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.15;
+
+  // Scene
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x080808);
+  scene.fog = new THREE.FogExp2(0x080808, 0.024);
+
+  // Camera
+  camera = new THREE.PerspectiveCamera(
+    isMobile ? 54 : 42,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    200
+  );
+  camera.position.copy(camState.pos);
+
+  // Build Environment
+  setupEnvironment();
+
+  // Setup Poses
+  buildCamPoses();
+
+  // Measure initial DOM layout
+  setTimeout(() => {
+    measureKeyframes();
+    poseAtScroll();
+  }, 100);
+
+  // Events
+  window.addEventListener('mousemove', onMouseMove, { passive: true });
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onResize);
+
+  // Start loop
+  animate();
 }
 
-/**
- * Get the Three.js scene for adding objects
- */
+/* ---------- Toggle 3D Mode ---------- */
+export function toggle3DMode(forceState) {
+  glOn = forceState !== undefined ? forceState : !glOn;
+  document.documentElement.classList.toggle('gl-on', glOn);
+  document.documentElement.classList.toggle('no-gl', !glOn);
+  return glOn;
+}
+
+export function isWebGLEnabled() {
+  return inited && glOn;
+}
+
 export function getScene() {
   return scene;
 }
 
-/**
- * Get the camera
- */
 export function getCamera() {
   return camera;
-}
-
-/**
- * Check if WebGL is enabled
- */
-export function isWebGLEnabled() {
-  return isInitialized && !isLowPerf;
-}
-
-/**
- * Add an object to the scene
- */
-export function addToScene(object) {
-  if (scene) scene.add(object);
-}
-
-/**
- * Remove an object from the scene
- */
-export function removeFromScene(object) {
-  if (scene) scene.remove(object);
-}
-
-/**
- * Create a texture from image URL
- */
-export function loadTexture(url) {
-  return new Promise((resolve, reject) => {
-    const loader = new THREE.TextureLoader();
-    loader.crossOrigin = 'anonymous';
-    loader.load(
-      url,
-      (texture) => {
-        texture.colorSpace = THREE.SRGBColorSpace;
-        texture.minFilter = THREE.LinearFilter;
-        texture.magFilter = THREE.LinearFilter;
-        resolve(texture);
-      },
-      undefined,
-      reject
-    );
-  });
-}
-
-/**
- * Get current scroll progress (0-1)
- */
-export function getScrollProgress() {
-  return scrollProgress;
-}
-
-/**
- * Dispose and cleanup
- */
-export function disposeScene() {
-  if (animationId) cancelAnimationFrame(animationId);
-  window.removeEventListener('mousemove', onMouseMove);
-  window.removeEventListener('scroll', onScroll);
-  window.removeEventListener('resize', onResize);
-
-  ambientObjects.forEach(obj => {
-    obj.geometry.dispose();
-    obj.material.dispose();
-    scene.remove(obj);
-  });
-
-  if (renderer) renderer.dispose();
 }
 
 export { THREE };

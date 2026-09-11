@@ -1,0 +1,67 @@
+Redesign my EXISTING game-deals website to visually and structurally replicate the experience of:
+https://amix-design.com/tl/web-g-threejs/
+
+Do NOT copy its content. Adapt its design language to a game-deals/price-comparison platform.
+
+IMPORTANT:
+Keep all existing functionality, APIs, data, routes, authentication and business logic. Upgrade the frontend/design only.
+
+CORE EXPERIENCE:
+- Full-screen immersive Three.js/WebGL website
+- Scroll-driven 3D storytelling
+- Every major game/deal is a cinematic 3D scene
+- Large game artwork rendered as layered 3D planes/depth objects
+- Camera moves and transforms between sections as the user scrolls
+- Mouse/touch creates subtle perspective/depth movement
+- Smooth cinematic transitions between scenes
+- Objects enter/exit from different depths
+- Subtle particles, lighting and atmospheric effects
+- Real 3D depth, not fake CSS 3D cards
+
+PAGE STRUCTURE:
+NAV → 3D HERO → DEAL 01 → DEAL 02 → DEAL 03 → DEAL 04 → TRENDING → STORES → FINAL CTA → FOOTER
+
+HERO:
+Minimal AMIX-style navigation.
+Huge typography:
+“FIND THE BEST
+GAME DEALS.”
+Small supporting text + search.
+3D game artwork floating behind/around typography.
+Scroll indicator.
+
+DEAL SECTIONS:
+Each deal occupies approximately one viewport.
+Use a different 3D composition for each game.
+Large game title + tiny metadata positioned editorially over the scene.
+Show:
+DISCOUNT / CURRENT PRICE / ORIGINAL PRICE / STORE / GET DEAL
+Keep this UI crisp and readable while the background remains immersive.
+
+VISUAL STYLE:
+Near-black #080808
+Warm white #F2F0EA
+Muted gray #858580
+Acid green #C8FF3D
+Minimal borders.
+Huge bold grotesk typography.
+Very large negative space.
+No generic ecommerce grid aesthetic.
+No neon gamer/RGB aesthetic.
+No excessive gradients or glassmorphism.
+
+MOTION:
+Scroll controls the 3D camera.
+Use smooth interpolation/lerping.
+Cinematic object rotations, scale, depth and parallax.
+Each section should feel like entering a new 3D scene.
+Use Three.js/WebGL for the actual visual layer.
+
+RESPONSIVE:
+Desktop = full immersive 3D experience.
+Mobile = simplified but still 3D, touch-responsive and performant.
+
+MOST IMPORTANT:
+The finished site should FEEL like the AMIX reference first, and a game-deals website second.
+Preserve usability: prices, stores, search and deal CTAs must remain obvious.
+Do not redesign it into a conventional ecommerce dashboard.

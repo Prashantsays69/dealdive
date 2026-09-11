@@ -1,111 +1,132 @@
 /* ============================================================
-   Immersive Hero — Full-screen cinematic 3D entrance
-   Large game artwork planes with mouse parallax depth,
-   oversized headline, and integrated search trigger.
+   Immersive Hero — AMIX-Inspired 3D Entrance
+   Oversized typography: "FIND THE BEST GAME DEALS."
+   Floating game artwork in 3D depth + instant search trigger.
    ============================================================ */
 
 import { $, el, icons } from '../utils/dom.js';
-import { fetchHeroDeals, getHeroImage, getGameImage } from '../api/cheapshark.js';
-import { isWebGLEnabled, addToScene, registerSection } from '../3d/scene3d.js';
-import { createImagePlaneGroup, updatePlanesParallax } from '../3d/imageplane.js';
+import { fetchHeroDeals, getHeroImage } from '../api/cheapshark.js';
+import { isWebGLEnabled, getScene } from '../3d/scene3d.js';
+import * as THREE from 'three';
 
 let heroGroup = null;
-let heroDeals = [];
 
 export async function initHeroImmersive({ onSearchClick, storesMap }) {
-  const container = $('#hero-3d');
+  const container = $('#hero');
   if (!container) return;
 
-  // Fetch hero deals
-  try {
-    heroDeals = await fetchHeroDeals();
-  } catch (err) {
-    console.error('Hero deals fetch failed:', err);
-    heroDeals = [];
-  }
-
-  // Render HTML overlay
+  // Render HTML structure
   renderHeroHTML(container, onSearchClick);
 
-  // Init 3D planes if WebGL available
-  if (isWebGLEnabled() && heroDeals.length > 0) {
-    await initHero3D();
+  // Fetch deals for floating 3D hero planes
+  try {
+    const deals = await fetchHeroDeals();
+    if (deals && deals.length > 0 && isWebGLEnabled()) {
+      initHero3DPlanes(deals);
+    }
+  } catch (err) {
+    console.error('Hero deals fetch failed:', err);
   }
-
-  // Scroll-triggered reveal
-  setTimeout(() => {
-    container.classList.add('hero-entered');
-  }, 100);
 }
 
 function renderHeroHTML(container, onSearchClick) {
   container.innerHTML = `
-    <div class="hero3d-content">
-      <div class="hero3d-meta meta-label">PC Game Deals — Live Prices</div>
-      <h1 class="hero3d-headline display-hero">
-        <span class="hero3d-line">Discover.</span>
-        <span class="hero3d-line">Compare.</span>
-        <span class="hero3d-line hero3d-line-accent">Save.</span>
+    <div class="hero-inner">
+      <div class="hero-eyebrow meta-label">
+        <span class="status-pulse"></span>
+        CHEAPSHARK INTELLIGENCE // REAL-TIME PC DEALS
+      </div>
+
+      <h1 class="hero-title">
+        <span class="hero-title-line">FIND THE BEST</span>
+        <span class="hero-title-line text-accent">GAME DEALS.</span>
       </h1>
-      <p class="hero3d-sub">The best PC game deals across Steam, Epic, GOG and more — curated in real-time.</p>
-      <button class="hero3d-search-trigger" id="hero-search-trigger">
-        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <span>Search games...</span>
-        <kbd>⌘K</kbd>
-      </button>
-    </div>
-    <div class="hero3d-scroll-indicator">
-      <span class="meta-label">Scroll</span>
-      <div class="hero3d-scroll-line"></div>
+
+      <p class="hero-lead">
+        Real-time price comparisons across Steam, Epic Games, GOG and official storefronts.
+        Every major discount, tracked in interactive 3D depth.
+      </p>
+
+      <div class="hero-search-wrapper">
+        <button type="button" class="hero-search-btn" id="hero-search-btn" aria-label="Search games">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <span class="hero-search-placeholder">Search games, franchises, or publishers...</span>
+          <kbd class="hero-search-kbd">⌘K</kbd>
+        </button>
+      </div>
+
+      <div class="hero-scroll" aria-hidden="true">
+        <span class="hero-scroll-bar"></span>
+        <span class="hero-scroll-text">SCROLL</span>
+      </div>
     </div>
   `;
 
-  // Search trigger
-  const searchTrigger = $('#hero-search-trigger');
-  if (searchTrigger && onSearchClick) {
-    searchTrigger.addEventListener('click', onSearchClick);
-  }
+  $('#hero-search-btn')?.addEventListener('click', onSearchClick);
 }
 
-async function initHero3D() {
-  const imageUrls = heroDeals
-    .slice(0, 5)
-    .map(deal => getHeroImage(deal))
-    .filter(Boolean);
+function initHero3DPlanes(deals) {
+  const scene = getScene();
+  if (!scene) return;
 
-  if (imageUrls.length === 0) return;
+  heroGroup = new THREE.Group();
+  const loader = new THREE.TextureLoader();
+  loader.crossOrigin = 'anonymous';
 
-  try {
-    heroGroup = await createImagePlaneGroup(imageUrls, {
-      spacing: 3,
-      depthSpacing: 2.5,
-      startZ: -3,
-      maxWidth: 6,
-      scaleVariation: 0.5,
+  const positions = [
+    { x: 3.2, y: 1.2, z: -2.0, rx: 0.05, ry: -0.35, scale: 1.1 },
+    { x: -3.8, y: -0.5, z: -5.0, rx: -0.05, ry: 0.4, scale: 1.3 },
+    { x: 4.2, y: -1.6, z: -7.0, rx: 0.08, ry: -0.28, scale: 1.4 },
+  ];
+
+  deals.slice(0, 3).forEach((deal, idx) => {
+    const pos = positions[idx];
+    const imgUrl = getHeroImage(deal);
+    if (!imgUrl) return;
+
+    const planeGroup = new THREE.Group();
+
+    // 1. Backing bevel frame
+    const frameGeo = new THREE.BoxGeometry(3.6 * pos.scale, 2.0 * pos.scale, 0.12);
+    const frameMat = new THREE.MeshStandardMaterial({
+      color: 0x141414,
+      metalness: 0.6,
+      roughness: 0.4,
+    });
+    const frameMesh = new THREE.Mesh(frameGeo, frameMat);
+    planeGroup.add(frameMesh);
+
+    // 2. Neon edge
+    const edgeGeo = new THREE.BoxGeometry(3.64 * pos.scale, 2.04 * pos.scale, 0.03);
+    const edgeMat = new THREE.MeshBasicMaterial({
+      color: 0xC8FF3D,
+      transparent: true,
+      opacity: 0.4,
+    });
+    const edgeMesh = new THREE.Mesh(edgeGeo, edgeMat);
+    edgeMesh.position.z = -0.04;
+    planeGroup.add(edgeMesh);
+
+    // 3. Screen
+    const screenGeo = new THREE.PlaneGeometry(3.5 * pos.scale, 1.9 * pos.scale);
+    const screenMat = new THREE.MeshBasicMaterial({ color: 0x1a1a1a });
+    const screenMesh = new THREE.Mesh(screenGeo, screenMat);
+    screenMesh.position.z = 0.07;
+    planeGroup.add(screenMesh);
+
+    loader.load(imgUrl, (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace;
+      screenMesh.material = new THREE.MeshBasicMaterial({ map: tex });
     });
 
-    heroGroup.position.set(2, 0, -2);
+    planeGroup.position.set(pos.x, pos.y, pos.z);
+    planeGroup.rotation.set(pos.rx, pos.ry, 0);
 
-    addToScene(heroGroup);
+    heroGroup.add(planeGroup);
+  });
 
-    // Register for scroll/mouse updates
-    registerSection({
-      id: 'hero',
-      update: (scrollProg, mx, my, elapsed) => {
-        if (!heroGroup) return;
-
-        // Parallax from mouse
-        updatePlanesParallax(heroGroup, mx, my);
-
-        // Scroll: push group deeper as user scrolls
-        heroGroup.position.z = -2 - scrollProg * 15;
-        heroGroup.rotation.y = scrollProg * 0.3;
-
-        // Gentle float
-        heroGroup.position.y = Math.sin(elapsed * 0.3) * 0.1;
-      },
-    });
-  } catch (err) {
-    console.warn('Hero 3D init failed, falling back to CSS:', err);
-  }
+  scene.add(heroGroup);
 }

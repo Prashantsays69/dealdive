@@ -1,94 +1,63 @@
 /* ============================================================
-   Platform Section — Interactive store/platform tiles
-   Displays top stores with 3D tilt hover effects.
+   Platform Section — AMIX Store Monoliths
+   Interactive storefront pedestals (Steam, Epic, GOG, etc.)
+   Filtering directly into the preserved Deals Catalog.
    ============================================================ */
 
 import { $, el, icons } from '../utils/dom.js';
 import { getStoreLogo } from '../api/cheapshark.js';
 import { refreshGrid } from './dealGrid.js';
-import { observeReveal } from '../3d/scrollAnimator.js';
 
 export function initPlatformSection({ stores }) {
-  const container = $('#platform-section');
+  const container = $('#stores');
   if (!container) return;
 
-  // Top priority stores
-  const priorityIDs = ['1', '25', '7', '13'];
+  const priorityIDs = ['1', '25', '7', '13', '11'];
   const topStores = stores.filter(s => priorityIDs.includes(s.storeID));
-  const otherStores = stores.filter(s => !priorityIDs.includes(s.storeID)).slice(0, 4);
-  const displayStores = [...topStores, ...otherStores];
+  const displayStores = topStores.length > 0 ? topStores : stores.slice(0, 5);
 
-  if (displayStores.length === 0) {
-    container.style.display = 'none';
-    return;
-  }
-
-  renderPlatformSection(container, displayStores);
-}
-
-function renderPlatformSection(container, stores) {
-  const sectionLabel = el('div', { class: 'section-label meta-label' }, 'Platforms');
-  const sectionTitle = el('h2', { class: 'section-title display-h1' });
-  sectionTitle.innerHTML = 'Browse by <span class="text-accent">Store</span>';
-
-  const grid = el('div', { class: 'platform-grid' });
-
-  stores.forEach((store, i) => {
-    const logoUrl = getStoreLogo(store.images);
-    const tile = el('div', {
-      class: 'platform-tile reveal-item',
-      style: `--i: ${i}`,
-      dataset: { storeId: store.storeID },
-    });
-
-    tile.innerHTML = `
-      <div class="platform-tile-icon">
-        <img src="${logoUrl}" alt="${store.storeName}" />
+  container.innerHTML = `
+    <div class="stores-inner">
+      <div class="stores-header">
+        <div class="meta-label">OFFICIAL STOREFRONTS // DIRECT SYNC</div>
+        <h2 class="stores-title">Verified Platforms</h2>
+        <p class="stores-sub">Official API endpoints with 0% markup. Select a storefront to inspect active sale events.</p>
       </div>
-      <div class="platform-tile-info">
-        <span class="platform-tile-name">${store.storeName}</span>
-        <span class="platform-tile-cta meta-label">Browse Deals →</span>
+
+      <div class="stores-platform-grid">
+        ${displayStores.map((store, i) => {
+          const logoUrl = getStoreLogo(store.images);
+          return `
+            <button type="button" class="store-monolith-btn" data-store-id="${store.storeID}">
+              <div class="store-monolith-glow"></div>
+              <div class="store-monolith-icon">
+                <img src="${logoUrl}" alt="${store.storeName}" />
+              </div>
+              <div class="store-monolith-info">
+                <span class="store-monolith-name">${store.storeName}</span>
+                <span class="store-monolith-tag meta-label">ACTIVE SALES →</span>
+              </div>
+            </button>
+          `;
+        }).join('')}
       </div>
-    `;
+    </div>
+  `;
 
-    // 3D tilt
-    tile.addEventListener('mousemove', (e) => {
-      const rect = tile.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width;
-      const y = (e.clientY - rect.top) / rect.height;
-      const rotateX = (0.5 - y) * 8;
-      const rotateY = (x - 0.5) * 8;
-      tile.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-4px)`;
-    });
-
-    tile.addEventListener('mouseleave', () => {
-      tile.style.transform = 'perspective(600px) rotateX(0) rotateY(0) translateY(0)';
-    });
-
-    // Click → filter grid by store
-    tile.addEventListener('click', () => {
+  // Attach click filters
+  container.querySelectorAll('.store-monolith-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const storeId = btn.dataset.storeId;
       refreshGrid({
-        storeID: store.storeID,
+        storeID: storeId,
         sortBy: 'Deal Rating',
         onSale: true,
       });
 
-      // Scroll to deals grid
-      const main = document.getElementById('main-content');
-      if (main) {
-        main.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const catalog = document.getElementById('catalog');
+      if (catalog) {
+        catalog.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     });
-
-    grid.appendChild(tile);
   });
-
-  container.appendChild(sectionLabel);
-  container.appendChild(sectionTitle);
-  container.appendChild(grid);
-
-  // Reveal animation
-  setTimeout(() => {
-    observeReveal(container.querySelectorAll('.reveal-item'));
-  }, 100);
 }

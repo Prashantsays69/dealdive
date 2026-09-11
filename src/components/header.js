@@ -1,54 +1,68 @@
 /* ============================================================
-   Header Component — Floating Dark Minimal Navbar
+   Header Component — AMIX-Style Minimal Navigation
+   Clean Space Mono brand, 3D toggle, search, and wishlist.
    ============================================================ */
 
 import { $, el, icons } from '../utils/dom.js';
+import { toggle3DMode } from '../3d/scene3d.js';
 
 export function initHeader({ onSearchClick, onWishlistClick }) {
   const header = $('#site-header');
+  if (!header) return;
 
   header.innerHTML = `
-    <div class="header-inner">
-      <a href="/" class="header-logo" id="header-logo">
-        Deal<span class="logo-accent">Dive</span>
+    <div class="site-head-inner">
+      <a href="/" class="site-head-brand" id="header-brand">
+        DEAL<span class="brand-accent">DIVE</span>
       </a>
 
-      <nav class="header-nav" id="header-nav">
-        <a href="#" class="active" data-nav="deals">Deals</a>
-        <a href="#" data-nav="popular">Popular Games</a>
-        <a href="#" data-nav="free">Free Games</a>
-      </nav>
+      <div class="site-head-nav">
+        <a href="#catalog" class="site-head-link" data-nav="deals">DEALS</a>
+        <a href="#catalog" class="site-head-link" data-nav="popular">POPULAR</a>
+        <button type="button" class="site-head-link" id="header-wishlist-btn" title="Wishlist">
+          WISHLIST <span class="wishlist-badge" id="wishlist-count">0</span>
+        </button>
+      </div>
 
-      <div class="header-actions">
-        <button class="header-btn" id="header-search-btn" aria-label="Search games" title="Search">
+      <div class="site-head-right">
+        <button type="button" class="gl-toggle-btn" id="glToggle" aria-pressed="true">
+          3D <span>ON</span>
+        </button>
+
+        <button type="button" class="site-head-search-btn" id="header-search-btn" aria-label="Search games" title="Search (⌘K)">
           ${icons.search}
-        </button>
-        <button class="header-btn" id="header-wishlist-btn" aria-label="Wishlist" title="Wishlist">
-          ${icons.heart}
-          <span class="wishlist-count" id="wishlist-count" data-count="0"></span>
-        </button>
-        <button class="header-btn header-menu-btn" id="header-menu-btn" aria-label="Menu">
-          ${icons.menu}
+          <span class="search-kbd">⌘K</span>
         </button>
       </div>
     </div>
   `;
 
-  // Scroll — add scrolled class for backdrop
-  let lastScroll = 0;
+  // Scroll style change
   window.addEventListener('scroll', () => {
-    const scrollY = window.scrollY;
-    header.classList.toggle('scrolled', scrollY > 50);
-    lastScroll = scrollY;
+    header.classList.toggle('scrolled', window.scrollY > 40);
   }, { passive: true });
 
   // Search button
-  $('#header-search-btn').addEventListener('click', onSearchClick);
+  $('#header-search-btn')?.addEventListener('click', onSearchClick);
 
   // Wishlist button
-  $('#header-wishlist-btn').addEventListener('click', onWishlistClick);
+  $('#header-wishlist-btn')?.addEventListener('click', onWishlistClick);
 
-  // Nav links — filter by type
+  // 3D Toggle
+  const toggleBtn = $('#glToggle');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      const isNowOn = toggle3DMode();
+      toggleBtn.setAttribute('aria-pressed', String(isNowOn));
+      const span = toggleBtn.querySelector('span');
+      if (span) {
+        span.textContent = isNowOn ? 'ON' : 'OFF';
+        span.style.color = isNowOn ? '#C8FF3D' : '#FF5B55';
+      }
+    });
+  }
+
+  // Nav links
   const navLinks = header.querySelectorAll('[data-nav]');
   navLinks.forEach(link => {
     link.addEventListener('click', (e) => {
@@ -57,18 +71,17 @@ export function initHeader({ onSearchClick, onWishlistClick }) {
       link.classList.add('active');
 
       const nav = link.dataset.nav;
-      // Dispatch custom event for main.js to handle
       window.dispatchEvent(new CustomEvent('nav-change', { detail: { nav } }));
+
+      // Smooth scroll to catalog
+      const catalog = document.getElementById('catalog');
+      if (catalog) catalog.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   });
 
-  // Keyboard shortcut: / or Ctrl+K to open search
+  // Keyboard shortcut: / or Ctrl+K / Cmd+K
   document.addEventListener('keydown', (e) => {
-    if (e.key === '/' && !isInputFocused()) {
-      e.preventDefault();
-      onSearchClick();
-    }
-    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    if ((e.key === '/' && !isInputFocused()) || ((e.ctrlKey || e.metaKey) && e.key === 'k')) {
       e.preventDefault();
       onSearchClick();
     }
@@ -81,8 +94,8 @@ export function initHeader({ onSearchClick, onWishlistClick }) {
 export function updateWishlistCount(count) {
   const badge = $('#wishlist-count');
   if (!badge) return;
-  badge.textContent = count > 0 ? count : '';
-  badge.dataset.count = count;
+  badge.textContent = count;
+  badge.classList.toggle('has-items', count > 0);
 }
 
 function isInputFocused() {
