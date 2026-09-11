@@ -1,5 +1,5 @@
 /* ============================================================
-   Animations & Micro-interactions
+   Animations & Micro-interactions — Immersive Dark Theme
    ============================================================ */
 
 /* Spin */
@@ -7,7 +7,7 @@
   to { transform: rotate(360deg); }
 }
 
-/* Skeleton shimmer */
+/* Skeleton shimmer — dark */
 @keyframes shimmer {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
@@ -51,6 +51,18 @@
   to { opacity: 1; }
 }
 
+/* Fade in with delay — for scroll indicator etc */
+@keyframes fadeInDelayed {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Scale in */
 @keyframes scaleIn {
   from {
@@ -76,7 +88,8 @@
   60% { transform: scale(0.9); }
   100% { transform: scale(1); }
 }
-.deal-wishlist-btn.popping {
+.deal-wishlist-btn.popping,
+.trending-wishlist-btn.popping {
   animation: heartPop 400ms var(--ease-out);
 }
 
@@ -117,4 +130,74 @@
 }
 .filter-chip.just-activated {
   animation: chipActivate 200ms var(--ease-out);
+}
+
+/* Scroll indicator line float */
+@keyframes scrollLineFloat {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scaleY(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleY(1.2);
+  }
+}
+
+/* ---- 3D / Immersive section animations ---- */
+
+/* Hero entrance — staggered line reveals */
+.hero3d-line {
+  opacity: 0;
+  transform: translateY(40px);
+  animation: heroLineReveal var(--duration-cinematic) var(--ease-expo) forwards;
+}
+.hero3d-line:nth-child(1) { animation-delay: 200ms; }
+.hero3d-line:nth-child(2) { animation-delay: 400ms; }
+.hero3d-line:nth-child(3) { animation-delay: 600ms; }
+
+@keyframes heroLineReveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Section title entrance */
+.section-title {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity var(--duration-slow) var(--ease-expo),
+              transform var(--duration-slow) var(--ease-expo);
+}
+.section-title.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Gallery card subtle float */
+@keyframes cardFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* Platform tile glow pulse */
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 0 rgba(200, 255, 61, 0); }
+  50% { box-shadow: 0 0 20px rgba(200, 255, 61, 0.06); }
+}
+
+/* CTA button pulse */
+@keyframes ctaPulse {
+  0%, 100% { box-shadow: 0 0 0 rgba(200, 255, 61, 0); }
+  50% { box-shadow: 0 0 40px rgba(200, 255, 61, 0.15); }
+}
+.cta-primary {
+  animation: ctaPulse 3s ease-in-out infinite;
+}
+
+/* Parallax scroll float for featured backgrounds */
+@keyframes bgFloat {
+  0%, 100% { transform: scale(1.08) translateY(0); }
+  50% { transform: scale(1.08) translateY(-8px); }
 }

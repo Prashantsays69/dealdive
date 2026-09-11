@@ -7,19 +7,37 @@
   <meta name="description" content="Discover the best PC game deals across Steam, Epic, GOG and more. Compare prices, track discounts, and never overpay for games." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <script type="module" src="/src/main.js"></script>
 </head>
 <body>
+  <!-- Three.js WebGL Canvas (injected by scene3d.js, fallback anchor) -->
+  <canvas id="three-canvas"></canvas>
+
   <div id="app">
-    <!-- Header -->
+    <!-- Header — floating minimal navbar -->
     <header id="site-header" class="header"></header>
 
-    <!-- Hero Carousel -->
-    <section id="hero" class="hero"></section>
+    <!-- Hero — Full-screen 3D cinematic -->
+    <section id="hero-3d" class="hero3d immersive-section"></section>
 
-    <!-- Main Content -->
+    <!-- Featured Games — Scroll-driven cinematic scenes -->
+    <section id="featured-games" class="featured-games immersive-section"></section>
+
+    <!-- Best Deals Gallery — Horizontal 3D gallery -->
+    <section id="best-deals-gallery" class="best-deals-gallery immersive-section"></section>
+
+    <!-- Platform Section — Interactive store tiles -->
+    <section id="platform-section" class="platform-section immersive-section"></section>
+
+    <!-- Trending Cards — Layered 3D cards -->
+    <section id="trending-cards" class="trending-cards immersive-section"></section>
+
+    <!-- CTA Section -->
+    <section id="cta-section" class="cta-section immersive-section"></section>
+
+    <!-- Main Content — Filter Bar + Deals Grid (preserved) -->
     <main id="main-content" class="main">
       <!-- Filter Bar -->
       <div id="filter-bar" class="filter-bar"></div>

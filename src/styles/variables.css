@@ -1,43 +1,48 @@
 /* ============================================================
-   DealDive Design Tokens
+   DealDive Design Tokens — Immersive Dark Theme
    ============================================================ */
 
 :root {
   /* ---- Colors ---- */
-  --color-bg:       #F6F6F2;
-  --color-text:     #111111;
-  --color-surface:  #FFFFFF;
-  --color-muted:    #707070;
-  --color-border:   #E5E5E0;
-  --color-accent:   #B8F23D;
+  --color-bg:       #080808;
+  --color-text:     #F2F0EA;
+  --color-surface:  #141414;
+  --color-muted:    #858580;
+  --color-border:   rgba(255, 255, 255, 0.12);
+  --color-accent:   #C8FF3D;
   --color-sale:     #FF5B55;
 
-  --color-accent-dark: #9CD62E;
-  --color-accent-fg:   #111111;
-  --color-surface-hover: #FAFAF7;
-  --color-overlay:  rgba(17, 17, 17, 0.6);
-  --color-skeleton: #EDEDEA;
-  --color-skeleton-shine: #F6F6F2;
+  --color-accent-dark: #A8E020;
+  --color-accent-fg:   #080808;
+  --color-surface-hover: #1c1c1c;
+  --color-overlay:  rgba(8, 8, 8, 0.85);
+  --color-skeleton: #1a1a1a;
+  --color-skeleton-shine: #252525;
+  --color-card:     #141414;
 
   /* ---- Typography ---- */
-  --font-display: 'Sora', sans-serif;
+  --font-display: 'Inter', sans-serif;
   --font-body:    'Inter', sans-serif;
-  --font-mono:    'IBM Plex Mono', monospace;
+  --font-mono:    'Geist Mono', 'IBM Plex Mono', monospace;
 
-  /* Display sizes */
-  --text-hero:   clamp(2.5rem, 6vw, 5rem);
-  --text-h1:     clamp(2rem, 4vw, 3.5rem);
-  --text-h2:     clamp(1.5rem, 3vw, 2.25rem);
+  /* Display sizes — oversized for cinematic feel */
+  --text-hero:   clamp(3.5rem, 10vw, 9rem);
+  --text-h1:     clamp(2.5rem, 6vw, 5rem);
+  --text-h2:     clamp(1.75rem, 4vw, 3rem);
   --text-h3:     clamp(1.125rem, 2vw, 1.5rem);
   --text-body:   1rem;
   --text-small:  0.875rem;
   --text-xs:     0.75rem;
   --text-xxs:    0.6875rem;
+  --text-meta:   0.625rem;
 
-  --tracking-tight:  -0.03em;
-  --tracking-normal: -0.01em;
-  --leading-tight:   1.1;
-  --leading-normal:  1.5;
+  --tracking-tight:    -0.04em;
+  --tracking-normal:   -0.01em;
+  --tracking-display:  -0.06em;
+  --tracking-wide:     0.12em;
+  --leading-tight:     0.92;
+  --leading-normal:    1.5;
+  --leading-display:   0.85;
 
   /* ---- Spacing ---- */
   --space-1:  0.25rem;
@@ -52,35 +57,43 @@
   --space-16: 4rem;
   --space-20: 5rem;
   --space-24: 6rem;
+  --space-32: 8rem;
 
   /* ---- Layout ---- */
   --max-width:  1400px;
-  --gutter:     clamp(1rem, 3vw, 2rem);
+  --gutter:     clamp(1.25rem, 4vw, 3rem);
 
   /* ---- Borders & Radius ---- */
   --radius-sm:  8px;
   --radius-md:  10px;
   --radius-lg:  12px;
   --radius-xl:  16px;
+  --radius-2xl: 20px;
   --radius-full: 9999px;
   --border:     1px solid var(--color-border);
 
   /* ---- Transitions ---- */
   --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-expo:   cubic-bezier(0.19, 1, 0.22, 1);
   --duration-fast:   200ms;
   --duration-normal: 400ms;
   --duration-slow:   600ms;
+  --duration-slower: 1000ms;
+  --duration-cinematic: 1400ms;
 
   /* ---- Shadows ---- */
-  --shadow-sm:  0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md:  0 4px 12px rgba(0,0,0,0.06);
-  --shadow-lg:  0 8px 30px rgba(0,0,0,0.08);
-  --shadow-card: 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md:  0 4px 16px rgba(0,0,0,0.4);
+  --shadow-lg:  0 8px 40px rgba(0,0,0,0.5);
+  --shadow-card: 0 2px 12px rgba(0,0,0,0.3);
+  --shadow-glow: 0 0 40px rgba(200, 255, 61, 0.08);
 
   /* ---- Z-index ---- */
-  --z-header:  100;
+  --z-canvas:  -1;
+  --z-content: 1;
   --z-filter:  90;
+  --z-header:  100;
   --z-modal:   200;
   --z-toast:   300;
 }

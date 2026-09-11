@@ -1,5 +1,5 @@
 /* ============================================================
-   Base Styles — Global typography, body, scrollbar
+   Base Styles — Dark Immersive Theme
    ============================================================ */
 
 html, body {
@@ -16,15 +16,17 @@ html, body {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+  position: relative;
+  z-index: var(--z-content);
 }
 
 /* Selection */
 ::selection {
   background: var(--color-accent);
-  color: var(--color-text);
+  color: var(--color-accent-fg);
 }
 
-/* Scrollbar */
+/* Scrollbar — dark */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -32,25 +34,26 @@ html, body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border);
+  background: rgba(255, 255, 255, 0.15);
   border-radius: var(--radius-full);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-muted);
+  background: rgba(255, 255, 255, 0.3);
 }
 
-/* Display headings */
+/* Display headings — huge, condensed */
 .display-hero {
   font-family: var(--font-display);
   font-size: var(--text-hero);
   font-weight: 800;
-  line-height: var(--leading-tight);
-  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-display);
+  letter-spacing: var(--tracking-display);
+  text-transform: uppercase;
 }
 .display-h1 {
   font-family: var(--font-display);
   font-size: var(--text-h1);
-  font-weight: 700;
+  font-weight: 800;
   line-height: var(--leading-tight);
   letter-spacing: var(--tracking-tight);
 }
@@ -69,6 +72,16 @@ html, body {
   letter-spacing: var(--tracking-tight);
 }
 
+/* Metadata labels — small uppercase, wide spacing */
+.meta-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-muted);
+}
+
 /* Mono prices */
 .mono {
   font-family: var(--font-mono);
@@ -77,6 +90,11 @@ html, body {
 /* Muted text */
 .text-muted {
   color: var(--color-muted);
+}
+
+/* Accent text */
+.text-accent {
+  color: var(--color-accent);
 }
 
 /* Visually hidden (accessible) */
@@ -102,4 +120,10 @@ html, body {
 /* Body no-scroll when modal open */
 body.no-scroll {
   overflow: hidden;
+}
+
+/* Section spacing */
+.immersive-section {
+  position: relative;
+  z-index: var(--z-content);
 }

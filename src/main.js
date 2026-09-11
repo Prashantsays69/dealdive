@@ -1,5 +1,5 @@
 /* ============================================================
-   DealDive — Main Entry Point
+   DealDive — Main Entry Point (Immersive 3D Edition)
    ============================================================ */
 
 // Styles
@@ -9,17 +9,29 @@ import './styles/base.css';
 import './styles/components.css';
 import './styles/animations.css';
 
-// Components
+// 3D Engine
+import { initScene3D } from './3d/scene3d.js';
+
+// Components — existing
 import { initHeader } from './components/header.js';
-import { initHero } from './components/hero.js';
 import { initFilters } from './components/filters.js';
 import { initDealGrid, refreshGrid } from './components/dealGrid.js';
 import { initSearch, openSearch } from './components/search.js';
 import { initWishlist, openWishlist } from './components/wishlist.js';
 import { fetchStores } from './api/cheapshark.js';
 
+// Components — new immersive sections
+import { initHeroImmersive } from './components/heroImmersive.js';
+import { initFeaturedGames } from './components/featuredGames.js';
+import { initBestDealsGallery } from './components/bestDealsGallery.js';
+import { initPlatformSection } from './components/platformSection.js';
+import { initTrendingCards } from './components/trendingCards.js';
+
 // ---- App Init ----
 async function init() {
+  // 0. Init 3D scene (creates WebGL canvas, starts render loop)
+  initScene3D();
+
   // 1. Fetch stores first (needed by all components)
   let stores = [];
   try {
@@ -32,16 +44,34 @@ async function init() {
   const storesMap = new Map();
   stores.forEach(s => storesMap.set(s.storeID, s));
 
-  // 2. Init header
+  // 2. Init header (floating dark navbar)
   initHeader({
     onSearchClick: openSearch,
     onWishlistClick: openWishlist,
   });
 
-  // 3. Init hero carousel
-  initHero(storesMap);
+  // 3. Init immersive hero (3D artwork planes + headline + search trigger)
+  initHeroImmersive({
+    onSearchClick: openSearch,
+    storesMap,
+  });
 
-  // 4. Init filters
+  // 4. Init featured games (scroll-driven cinematic scenes)
+  initFeaturedGames({ storesMap });
+
+  // 5. Init best deals gallery (horizontal 3D gallery)
+  initBestDealsGallery({ storesMap });
+
+  // 6. Init platform section (interactive store tiles)
+  initPlatformSection({ stores });
+
+  // 7. Init trending cards (layered 3D cards)
+  initTrendingCards({ storesMap });
+
+  // 8. Render CTA section
+  renderCTASection();
+
+  // 9. Init filters (preserved)
   initFilters({
     stores,
     onChange: (filters) => {
@@ -49,22 +79,22 @@ async function init() {
     },
   });
 
-  // 5. Init deal grid with Steam ('1') as default store
+  // 10. Init deal grid with Steam ('1') as default store (preserved)
   initDealGrid({
     stores,
     filters: { storeID: '1', sortBy: 'Deal Rating', onSale: true },
   });
 
-  // 6. Init search
+  // 11. Init search (preserved)
   initSearch();
 
-  // 7. Init wishlist
+  // 12. Init wishlist (preserved)
   initWishlist();
 
-  // 8. Render footer
+  // 13. Render footer
   renderFooter();
 
-  // 9. Handle nav changes
+  // 14. Handle nav changes (preserved)
   window.addEventListener('nav-change', (e) => {
     const { nav } = e.detail;
     handleNavChange(nav);
@@ -91,6 +121,30 @@ function handleNavChange(nav) {
   }
 }
 
+function renderCTASection() {
+  const cta = document.getElementById('cta-section');
+  if (!cta) return;
+
+  cta.innerHTML = `
+    <div class="cta-inner">
+      <div class="cta-label meta-label">Ready to Save?</div>
+      <h2 class="cta-headline display-h1">Never Overpay for <span class="text-accent">Games</span> Again</h2>
+      <p class="cta-sub">Browse thousands of deals across all major PC gaming stores. Real-time prices, no middleman.</p>
+      <div class="cta-actions">
+        <button class="cta-primary" id="cta-browse-btn">
+          Browse All Deals
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('cta-browse-btn')?.addEventListener('click', () => {
+    const main = document.getElementById('main-content');
+    if (main) main.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+
 function renderFooter() {
   const footer = document.getElementById('site-footer');
   if (!footer) return;
@@ -103,7 +157,7 @@ function renderFooter() {
       </div>
 
       <div class="footer-dev-card">
-        <span class="dev-label">Designed & Developed by</span>
+        <span class="dev-label meta-label">Designed & Developed by</span>
         <span class="dev-name">Prashant</span>
         <div class="dev-socials">
           <a href="https://github.com/Prashantsays69" target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub">

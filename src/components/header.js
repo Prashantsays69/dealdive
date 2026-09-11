@@ -1,5 +1,5 @@
 /* ============================================================
-   Header Component
+   Header Component — Floating Dark Minimal Navbar
    ============================================================ */
 
 import { $, el, icons } from '../utils/dom.js';
@@ -34,11 +34,11 @@ export function initHeader({ onSearchClick, onWishlistClick }) {
     </div>
   `;
 
-  // Scroll shadow
+  // Scroll — add scrolled class for backdrop
   let lastScroll = 0;
   window.addEventListener('scroll', () => {
     const scrollY = window.scrollY;
-    header.classList.toggle('scrolled', scrollY > 10);
+    header.classList.toggle('scrolled', scrollY > 50);
     lastScroll = scrollY;
   }, { passive: true });
 
