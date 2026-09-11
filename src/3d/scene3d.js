@@ -224,38 +224,32 @@ export function buildDealComposition(deal, index, imageUrl) {
 
 /* ---------- Camera Choreography ---------- */
 function buildCamPoses() {
-  const zLast = -62;
-
   if (isMobile) {
     camPoses = {
       hero: { pos: new THREE.Vector3(0, 1.2, 7.5), look: new THREE.Vector3(0, 1.0, -6) },
-      'deal-01': { pos: new THREE.Vector3(0, 2.2, -4.5), look: new THREE.Vector3(0, 0.6, -8.5) },
-      'deal-02': { pos: new THREE.Vector3(0, 2.2, -13.5), look: new THREE.Vector3(0, 0.6, -17.5) },
-      'deal-03': { pos: new THREE.Vector3(0, 2.2, -22.5), look: new THREE.Vector3(0, 0.6, -26.5) },
-      'deal-04': { pos: new THREE.Vector3(0, 2.2, -31.5), look: new THREE.Vector3(0, 0.6, -35.5) },
-      'best-deals': { pos: new THREE.Vector3(0, 2.4, -38.5), look: new THREE.Vector3(0, 0.8, -44.0) },
-      trending: { pos: new THREE.Vector3(0, 2.5, -45.5), look: new THREE.Vector3(0, 0.8, -50.0) },
-      stores: { pos: new THREE.Vector3(0, 2.0, -53.0), look: new THREE.Vector3(0, 0.5, -57.0) },
-      catalog: { pos: new THREE.Vector3(0, 1.5, -59.0), look: new THREE.Vector3(0, 0.5, -65.0) },
-      cta: { pos: new THREE.Vector3(0, 2.8, -64.0), look: new THREE.Vector3(0, 2.0, -71.0) },
-      foot: { pos: new THREE.Vector3(0, 3.5, -66.0), look: new THREE.Vector3(0, 3.0, -74.0) },
+      'featured-deal': { pos: new THREE.Vector3(0, 1.8, -6.0), look: new THREE.Vector3(0, 0.8, -12.0) },
+      'best-deals': { pos: new THREE.Vector3(0, 2.2, -18.0), look: new THREE.Vector3(0, 0.8, -25.0) },
+      trending: { pos: new THREE.Vector3(0, 2.2, -28.0), look: new THREE.Vector3(0, 0.8, -35.0) },
+      categories: { pos: new THREE.Vector3(0, 1.8, -38.0), look: new THREE.Vector3(0, 0.6, -44.0) },
+      stores: { pos: new THREE.Vector3(0, 1.8, -46.0), look: new THREE.Vector3(0, 0.5, -52.0) },
+      catalog: { pos: new THREE.Vector3(0, 1.5, -54.0), look: new THREE.Vector3(0, 0.5, -60.0) },
+      cta: { pos: new THREE.Vector3(0, 2.5, -62.0), look: new THREE.Vector3(0, 2.0, -69.0) },
+      foot: { pos: new THREE.Vector3(0, 3.0, -65.0), look: new THREE.Vector3(0, 2.5, -73.0) },
     };
     return;
   }
 
-  // Desktop Cinematic Angles (AMIX style alternating perspective)
+  // Desktop Cinematic Angles (Subtle Denmu + AMIX depth)
   camPoses = {
     hero: { pos: new THREE.Vector3(0, 1.4, 8.5), look: new THREE.Vector3(0, 1.0, -5.0) },
-    'deal-01': { pos: new THREE.Vector3(-1.8, 1.3, -4.5), look: new THREE.Vector3(2.4, 0.8, -8.5) },
-    'deal-02': { pos: new THREE.Vector3(1.8, 1.3, -13.5), look: new THREE.Vector3(-2.4, 0.8, -17.5) },
-    'deal-03': { pos: new THREE.Vector3(-1.9, 1.5, -22.5), look: new THREE.Vector3(2.4, 0.7, -26.5) },
-    'deal-04': { pos: new THREE.Vector3(1.8, 1.3, -31.5), look: new THREE.Vector3(-2.4, 0.8, -35.5) },
-    'best-deals': { pos: new THREE.Vector3(0, 2.8, -38.5), look: new THREE.Vector3(0, 0.8, -45.0) },
-    trending: { pos: new THREE.Vector3(0, 3.2, -46.5), look: new THREE.Vector3(0, 0.6, -53.0) },
-    stores: { pos: new THREE.Vector3(0, 2.2, -54.5), look: new THREE.Vector3(0, 0.8, -60.0) },
-    catalog: { pos: new THREE.Vector3(0, 1.2, -61.0), look: new THREE.Vector3(0, 0.6, -66.0) },
-    cta: { pos: new THREE.Vector3(0, 4.0, -66.0), look: new THREE.Vector3(0, 4.5, -74.0) },
-    foot: { pos: new THREE.Vector3(0, 4.5, -67.0), look: new THREE.Vector3(0, 4.8, -76.0) },
+    'featured-deal': { pos: new THREE.Vector3(-1.2, 1.6, -6.0), look: new THREE.Vector3(1.8, 0.8, -12.0) },
+    'best-deals': { pos: new THREE.Vector3(1.2, 1.8, -18.0), look: new THREE.Vector3(-1.8, 0.8, -25.0) },
+    trending: { pos: new THREE.Vector3(0, 2.2, -28.0), look: new THREE.Vector3(0, 0.7, -35.0) },
+    categories: { pos: new THREE.Vector3(0, 1.6, -38.0), look: new THREE.Vector3(0, 0.6, -44.0) },
+    stores: { pos: new THREE.Vector3(0, 1.8, -46.0), look: new THREE.Vector3(0, 0.8, -52.0) },
+    catalog: { pos: new THREE.Vector3(0, 1.2, -54.0), look: new THREE.Vector3(0, 0.6, -60.0) },
+    cta: { pos: new THREE.Vector3(0, 3.5, -62.0), look: new THREE.Vector3(0, 3.8, -70.0) },
+    foot: { pos: new THREE.Vector3(0, 4.0, -65.0), look: new THREE.Vector3(0, 4.2, -73.0) },
   };
 }
 
@@ -451,8 +445,8 @@ export function initScene3D() {
 
   // Scene
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x080808);
-  scene.fog = new THREE.FogExp2(0x080808, 0.024);
+  scene.background = new THREE.Color(0x090A0A);
+  scene.fog = new THREE.FogExp2(0x090A0A, 0.024);
 
   // Camera
   camera = new THREE.PerspectiveCamera(

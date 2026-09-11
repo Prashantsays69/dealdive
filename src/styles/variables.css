@@ -3,25 +3,26 @@
    ============================================================ */
 
 :root {
-  /* ---- Colors per ui.txt ---- */
-  --color-bg:               #08090A;
-  --color-surface:          #101214;
-  --color-surface-elevated: #151719;
-  --color-text:             #F5F5F0;
-  --color-secondary:        #8B8E91;
-  --color-muted:            #8B8E91;
-  --color-border:           rgba(255, 255, 255, 0.10);
-  --color-accent:           #C8FF3D;
+  /* ---- Colors per Denmu & ui.txt ---- */
+  --color-bg:               #090A0A;
+  --color-surface:          #141615;
+  --color-surface-elevated: #1B1E1C;
+  --color-text:             #F2F1EC;
+  --color-secondary:        #8A8C88;
+  --color-muted:            #8A8C88;
+  --color-border:           rgba(255, 255, 255, 0.08);
+  --color-border-subtle:    rgba(255, 255, 255, 0.04);
+  --color-accent:           #C7FF3D;
   --color-accent-hover:     #D9FF70;
   --color-sale:             #FF5B55;
 
   --color-accent-dark:      #A8E020;
-  --color-accent-fg:        #08090A;
-  --color-surface-hover:    #151719;
-  --color-overlay:          rgba(8, 9, 10, 0.85);
-  --color-skeleton:         #101214;
-  --color-skeleton-shine:   #1a1c1e;
-  --color-card:             #101214;
+  --color-accent-fg:        #090A0A;
+  --color-surface-hover:    #1B1E1C;
+  --color-overlay:          rgba(9, 10, 10, 0.88);
+  --color-skeleton:         #141615;
+  --color-skeleton-shine:   #1f2220;
+  --color-card:             #141615;
 
   /* ---- Typography ---- */
   --font-display: 'Inter', sans-serif;

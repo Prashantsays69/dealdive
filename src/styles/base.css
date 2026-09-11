@@ -58,28 +58,28 @@ html.no-gl #gl { display: none; }
   width: 100%;
 }
 
-/* AMIX pointer-event passthrough when 3D is on */
+/* Pointer-event handling when WebGL canvas is in background */
 html.gl-on .content { pointer-events: none; }
+html.gl-on .content .hero-editorial-container,
 html.gl-on .content .hero-inner,
-html.gl-on .content .deal-card,
+html.gl-on .content .featured-editorial-inner,
 html.gl-on .content .best-deals-inner,
 html.gl-on .content .trending-inner,
-html.gl-on .content .stores-inner,
+html.gl-on .content .categories-inner,
+html.gl-on .content .store-tabs-inner,
 html.gl-on .content .catalog-inner,
 html.gl-on .content .cta-inner,
 html.gl-on .content .footer-inner,
 html.gl-on .site-head,
+.mobile-nav-drawer,
+.search-modal,
+.wishlist-panel,
 .game-detail-modal { pointer-events: auto; }
 
-/* Base Section */
+/* Base Section Flow */
 .section {
-  min-height: 100vh;
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 10vh clamp(20px, 6vw, 100px);
   position: relative;
+  width: 100%;
 }
 
 /* Selection */
