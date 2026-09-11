@@ -1,0 +1,37 @@
+Integrate CheapShark + RAWG into the EXISTING game-deals website.
+
+IMPORTANT:
+Keep existing UI structure, functionality, routes and backend logic unless required for API integration. Do not rebuild the app.
+
+API ROLES:
+CheapShark = DEAL/PRICE SOURCE
+RAWG = GAME METADATA/ARTWORK SOURCE
+
+CHEAPSHARK:
+- Fetch current deals, prices, discounts, stores and deal URLs.
+- Use CheapShark as the authoritative source for pricing/deal information.
+- Preserve store/deal links.
+- Handle loading, empty states, API errors and expired deals.
+- Cache responses where appropriate to reduce requests.
+
+RAWG:
+- Enrich games using title/game ID matching.
+- Fetch cover/background artwork, screenshots, genres, platforms, release date, rating and description.
+- Use RAWG imagery for the visual presentation.
+- Do NOT use RAWG for prices.
+- Cache game metadata.
+
+DATA FLOW:
+CheapShark deals
+→ identify game
+→ match/enrich with RAWG
+→ merge into existing game/deal model
+→ render in UI
+
+FALLBACK:
+If RAWG cannot find a game, display CheapShark data normally.
+If either API fails, the rest of the website must remain functional.
+Never let missing artwork break deal rendering.
+
+UI:
+Use the existing immersive 3D/AMIX-style design.

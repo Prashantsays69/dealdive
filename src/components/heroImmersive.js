@@ -1,11 +1,11 @@
 /* ============================================================
-   Immersive Hero — AMIX-Inspired 3D Entrance
-   Oversized typography: "FIND THE BEST GAME DEALS."
-   Floating game artwork in 3D depth + instant search trigger.
+   Immersive Hero — AMIX 3D Entrance (RAWG Enriched)
+   Oversized typography + RAWG high-resolution 3D artwork planes.
    ============================================================ */
 
 import { $, el, icons } from '../utils/dom.js';
-import { fetchHeroDeals, getHeroImage } from '../api/cheapshark.js';
+import { fetchHeroDeals, getHeroImage, getGameImage } from '../api/cheapshark.js';
+import { enrichDealsWithRAWG } from '../api/rawg.js';
 import { isWebGLEnabled, getScene } from '../3d/scene3d.js';
 import * as THREE from 'three';
 
@@ -15,14 +15,16 @@ export async function initHeroImmersive({ onSearchClick, storesMap }) {
   const container = $('#hero');
   if (!container) return;
 
-  // Render HTML structure
   renderHeroHTML(container, onSearchClick);
 
-  // Fetch deals for floating 3D hero planes
   try {
-    const deals = await fetchHeroDeals();
-    if (deals && deals.length > 0 && isWebGLEnabled()) {
-      initHero3DPlanes(deals);
+    const rawDeals = await fetchHeroDeals();
+    if (rawDeals && rawDeals.length > 0) {
+      // Enrich top deals with RAWG
+      const enriched = await enrichDealsWithRAWG(rawDeals.slice(0, 3), 3);
+      if (isWebGLEnabled()) {
+        initHero3DPlanes(enriched);
+      }
     }
   } catch (err) {
     console.error('Hero deals fetch failed:', err);
@@ -34,7 +36,7 @@ function renderHeroHTML(container, onSearchClick) {
     <div class="hero-inner">
       <div class="hero-eyebrow meta-label">
         <span class="status-pulse"></span>
-        CHEAPSHARK INTELLIGENCE // REAL-TIME PC DEALS
+        CHEAPSHARK + RAWG INTELLIGENCE // REAL-TIME PC DEALS
       </div>
 
       <h1 class="hero-title">
@@ -44,7 +46,7 @@ function renderHeroHTML(container, onSearchClick) {
 
       <p class="hero-lead">
         Real-time price comparisons across Steam, Epic Games, GOG and official storefronts.
-        Every major discount, tracked in interactive 3D depth.
+        Enriched with RAWG visual intelligence and tracked in interactive 3D depth.
       </p>
 
       <div class="hero-search-wrapper">
@@ -84,7 +86,7 @@ function initHero3DPlanes(deals) {
 
   deals.slice(0, 3).forEach((deal, idx) => {
     const pos = positions[idx];
-    const imgUrl = getHeroImage(deal);
+    const imgUrl = deal.heroImage || deal.gameImage || getHeroImage(deal) || getGameImage(deal);
     if (!imgUrl) return;
 
     const planeGroup = new THREE.Group();

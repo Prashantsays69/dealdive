@@ -1,35 +1,37 @@
 /* ============================================================
-   Deal Sections — AMIX-Inspired 3D Viewport Scenes
-   Each deal occupies approximately one viewport with a dedicated
-   3D composition and crisp editorial metadata UI.
+   Deal Sections — AMIX 3D Viewport Scenes (RAWG Enriched)
+   Integrates CheapShark prices + RAWG high-res artwork & metadata.
    ============================================================ */
 
 import { $, el, icons } from '../utils/dom.js';
 import { formatPrice, formatDiscount } from '../utils/format.js';
 import { fetchHeroDeals, fetchDeals, deduplicateDeals, getHeroImage, getGameImage, getDealLink, getStoreLogo } from '../api/cheapshark.js';
+import { enrichDealsWithRAWG } from '../api/rawg.js';
 import { buildDealComposition, isWebGLEnabled } from '../3d/scene3d.js';
 import { isInWishlist, toggleWishlist } from './wishlist.js';
 
 export async function initDealSections({ storesMap }) {
-  let deals = [];
+  let rawDeals = [];
 
   try {
-    // Fetch top deals
     const heroDeals = await fetchHeroDeals();
     if (heroDeals && heroDeals.length >= 4) {
-      deals = heroDeals.slice(0, 4);
+      rawDeals = heroDeals.slice(0, 4);
     } else {
       const allDeals = await fetchDeals({
         pageSize: 30,
         sortBy: 'Deal Rating',
         onSale: true,
       });
-      deals = deduplicateDeals(allDeals).slice(0, 4);
+      rawDeals = deduplicateDeals(allDeals).slice(0, 4);
     }
   } catch (err) {
     console.error('Failed to fetch deals for deal sections:', err);
     return;
   }
+
+  // Enrich with RAWG artwork, ratings, and genre metadata
+  const deals = await enrichDealsWithRAWG(rawDeals, 4);
 
   deals.forEach((deal, idx) => {
     const sectionId = `deal-0${idx + 1}`;
@@ -38,9 +40,9 @@ export async function initDealSections({ storesMap }) {
 
     renderDealSection(sectionEl, deal, idx, storesMap);
 
-    // Build 3D composition for this deal
+    // Build 3D composition with RAWG high-res imagery
     if (isWebGLEnabled()) {
-      const imgUrl = getHeroImage(deal) || getGameImage(deal);
+      const imgUrl = deal.heroImage || deal.gameImage || getHeroImage(deal) || getGameImage(deal);
       buildDealComposition(deal, idx, imgUrl);
     }
   });
@@ -61,16 +63,23 @@ function renderDealSection(sectionEl, deal, index, storesMap) {
   const inWish = isInWishlist(deal.dealID);
   const metacritic = deal.metacriticScore && deal.metacriticScore !== '0' ? deal.metacriticScore : null;
 
+  // RAWG Metadata tags
+  const primaryGenre = deal.genres && deal.genres.length > 0 ? deal.genres[0].toUpperCase() : 'AAA DROP';
+  const rawgRating = deal.rawgRating ? Number(deal.rawgRating).toFixed(1) : null;
+
   sectionEl.classList.add(`deal-align-${side}`);
 
   sectionEl.innerHTML = `
     <div class="deal-card deal-card-${side}">
       <div class="deal-header-meta">
-        <span class="deal-badge meta-label">DEAL ${dealNumber} // FEATURED DROP</span>
-        <span class="deal-store-pill meta-label">
-          ${storeLogo ? `<img src="${storeLogo}" alt="${storeName}" class="deal-store-icon" />` : ''}
-          ${storeName}
-        </span>
+        <span class="deal-badge meta-label">DEAL ${dealNumber} // ${primaryGenre}</span>
+        <div class="deal-header-tags">
+          ${deal.rawg?.released ? `<span class="deal-year-pill meta-label">${deal.rawg.released.split('-')[0]}</span>` : ''}
+          <span class="deal-store-pill meta-label">
+            ${storeLogo ? `<img src="${storeLogo}" alt="${storeName}" class="deal-store-icon" />` : ''}
+            ${storeName}
+          </span>
+        </div>
       </div>
 
       <h2 class="deal-game-title">${deal.title}</h2>
@@ -91,12 +100,17 @@ function renderDealSection(sectionEl, deal, index, storesMap) {
           <span class="deal-meta-val deal-normal-price mono">${formatPrice(deal.normalPrice)}</span>
         </div>
 
-        ${metacritic ? `
+        ${rawgRating ? `
+          <div class="deal-meta-cell">
+            <span class="deal-meta-title meta-label">RAWG RATING</span>
+            <span class="deal-meta-val deal-rawg-score mono">★ ${rawgRating} / 5</span>
+          </div>
+        ` : (metacritic ? `
           <div class="deal-meta-cell">
             <span class="deal-meta-title meta-label">METACRITIC</span>
             <span class="deal-meta-val deal-meta-score mono">${metacritic} / 100</span>
           </div>
-        ` : ''}
+        ` : '')}
       </div>
 
       <div class="deal-card-actions">

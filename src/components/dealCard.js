@@ -22,7 +22,7 @@ export function createDealCard(deal, storesMap, featured = false, index = 0) {
   const store = storesMap.get(deal.storeID);
   const storeName = store ? store.storeName : '';
   const storeLogo = store ? getStoreLogo(store.images) : '';
-  const gameImg = getGameImage(deal);
+  const gameImg = deal.heroImage || deal.gameImage || getGameImage(deal);
   const dealLink = getDealLink(deal);
   const inWishlist = isInWishlist(deal.dealID);
   const metacritic = parseInt(deal.metacriticScore);

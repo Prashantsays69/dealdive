@@ -1,18 +1,19 @@
 /* ============================================================
-   Trending Cards — AMIX Layered 3D Showcase
-   High-velocity discounted games styled with AMIX editorial design.
+   Trending Cards — AMIX Layered 3D Showcase (RAWG Enriched)
+   High-velocity discounted games with RAWG artwork & tags.
    ============================================================ */
 
 import { $, el, icons } from '../utils/dom.js';
 import { formatPrice, formatDiscount } from '../utils/format.js';
 import { fetchDeals, deduplicateDeals, getGameImage, getDealLink, getStoreLogo } from '../api/cheapshark.js';
+import { enrichDealsWithRAWG } from '../api/rawg.js';
 import { isInWishlist, toggleWishlist } from './wishlist.js';
 
 export async function initTrendingCards({ storesMap }) {
   const container = $('#trending');
   if (!container) return;
 
-  let deals = [];
+  let rawDeals = [];
   try {
     const raw = await fetchDeals({
       sortBy: 'Savings',
@@ -20,13 +21,16 @@ export async function initTrendingCards({ storesMap }) {
       onSale: true,
       metacritic: 70,
     });
-    deals = deduplicateDeals(raw).filter(d => d.steamAppID).slice(0, 6);
+    rawDeals = deduplicateDeals(raw).filter(d => d.steamAppID).slice(0, 6);
   } catch (err) {
     console.error('Trending cards fetch failed:', err);
     return;
   }
 
-  if (deals.length === 0) return;
+  if (rawDeals.length === 0) return;
+
+  // Enrich with RAWG
+  const deals = await enrichDealsWithRAWG(rawDeals, 3);
 
   container.innerHTML = `
     <div class="trending-inner">
@@ -45,15 +49,17 @@ export async function initTrendingCards({ storesMap }) {
           const store = storesMap.get(deal.storeID);
           const storeName = store ? store.storeName : 'Steam';
           const storeLogo = getStoreLogo(deal.storeID);
-          const gameImg = getGameImage(deal);
+          const gameImg = deal.heroImage || deal.gameImage || getGameImage(deal);
           const dealLink = getDealLink(deal);
           const inWish = isInWishlist(deal.dealID);
+          const genreTag = deal.genres && deal.genres.length > 0 ? deal.genres[0] : null;
 
           return `
             <div class="amix-trending-card" style="--card-index: ${i}">
               <div class="amix-card-media">
                 <img src="${gameImg}" alt="${deal.title}" loading="lazy" />
                 <span class="amix-card-badge">-${savings}%</span>
+                ${genreTag ? `<span class="amix-card-genre meta-label">${genreTag}</span>` : ''}
               </div>
               <div class="amix-card-content">
                 <div class="amix-card-meta">
