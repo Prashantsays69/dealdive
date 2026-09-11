@@ -1,11 +1,10 @@
 /* ============================================================
-   Featured Deal Component — Denmu Massive Editorial Showcase
-   67% visual ratio, oversized display typography,
-   genre & metacritic tags, brand accent pricing,
-   direct GET DEAL CTA + View Details modal trigger.
+   Featured Deals — Denmu Asymmetric Editorial Compositions
+   Large widescreen compositions, oversized titles, tiny metadata,
+   deal pricing breakdown, GET DEAL buttons, and detail modal.
    ============================================================ */
 
-import { $, el, icons } from '../utils/dom.js';
+import { $, icons } from '../utils/dom.js';
 import { formatPrice } from '../utils/format.js';
 import { fetchHeroDeals, fetchDeals, deduplicateDeals, getHeroImage, getGameImage, getDealLink, getStoreLogo } from '../api/cheapshark.js';
 import { enrichDealsWithRAWG } from '../api/rawg.js';
@@ -13,48 +12,96 @@ import { openGameDetail } from './gameDetailModal.js';
 import { toggleWishlist, isInWishlist } from './wishlist.js';
 
 export async function initFeaturedDeal({ storesMap }) {
-  const container = $('#featured-deal');
+  const container = $('#featured');
   if (!container) return;
 
   renderSkeleton(container);
 
   try {
-    let topDeal = null;
+    let rawDeals = [];
     const heroDeals = await fetchHeroDeals();
-    if (heroDeals && heroDeals.length > 0) {
-      topDeal = heroDeals[0];
+    if (heroDeals && heroDeals.length >= 3) {
+      rawDeals = heroDeals.slice(0, 3);
     } else {
-      const deals = await fetchDeals({ pageSize: 10, sortBy: 'Deal Rating', onSale: true });
-      topDeal = deduplicateDeals(deals)[0];
+      const allDeals = await fetchDeals({ pageSize: 20, sortBy: 'Deal Rating', onSale: true });
+      rawDeals = deduplicateDeals(allDeals).slice(0, 3);
     }
 
-    if (!topDeal) return;
+    if (!rawDeals.length) return;
 
-    // Enrich top deal with RAWG
-    const enriched = await enrichDealsWithRAWG([topDeal], 1);
-    const deal = enriched[0] || topDeal;
-
-    renderFeaturedDeal(container, deal, storesMap);
+    // Enrich top 3 featured titles with RAWG
+    const deals = await enrichDealsWithRAWG(rawDeals, 3);
+    renderDenmuEditorialFeatured(container, deals, storesMap);
   } catch (err) {
-    console.error('Failed to init featured deal:', err);
+    console.error('Featured deals fetch error:', err);
   }
 }
 
 function renderSkeleton(container) {
   container.innerHTML = `
-    <div class="featured-editorial-inner">
-      <div class="featured-editorial-header">
-        <div class="meta-label">02 // EDITORIAL SPOTLIGHT</div>
-        <h2 class="featured-editorial-headline">Featured Deal of the Day</h2>
+    <div class="denmu-featured-inner">
+      <div class="denmu-section-header">
+        <span class="meta-label">01 // EDITORIAL CURATION</span>
+        <h2 class="denmu-section-title">Featured Selections</h2>
       </div>
-      <div class="featured-editorial-card skeleton-card">
-        <div class="skeleton-shimmer"></div>
+      <div class="denmu-featured-skeleton">
+        <div class="skeleton-block"></div>
       </div>
     </div>
   `;
 }
 
-function renderFeaturedDeal(container, deal, storesMap) {
+function renderDenmuEditorialFeatured(container, deals, storesMap) {
+  const leadDeal = deals[0];
+  const sideDeals = deals.slice(1, 3);
+
+  container.innerHTML = `
+    <div class="denmu-featured-inner">
+      <div class="denmu-section-header">
+        <div class="meta-label">01 // EDITORIAL CURATION</div>
+        <h2 class="denmu-section-title">Featured Selections</h2>
+        <p class="denmu-section-sub">
+          Handpicked historic discounts on critically acclaimed masterpieces.
+        </p>
+      </div>
+
+      <!-- Marquee Widescreen Composition 01 (Denmu Lead Feature) -->
+      ${leadDeal ? renderMarqueeFeature(leadDeal, storesMap) : ''}
+
+      <!-- Asymmetric Editorial Split (Games 02 & 03) -->
+      ${sideDeals.length > 0 ? `
+        <div class="denmu-editorial-split-row">
+          ${sideDeals.map((deal, idx) => renderSplitFeature(deal, storesMap, idx + 2)).join('')}
+        </div>
+      ` : ''}
+    </div>
+  `;
+
+  // Attach card click handlers to open Game Detail modal
+  container.querySelectorAll('.denmu-composition-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('a') || e.target.closest('button')) return;
+      const dealId = card.dataset.dealId;
+      const targetDeal = deals.find(d => d.dealID === dealId);
+      if (targetDeal) openGameDetail(targetDeal);
+    });
+  });
+
+  // Attach wishlist buttons
+  container.querySelectorAll('.composition-wish-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const dealId = btn.dataset.dealId;
+      const targetDeal = deals.find(d => d.dealID === dealId);
+      if (targetDeal) {
+        const added = toggleWishlist(targetDeal);
+        btn.classList.toggle('active', added);
+      }
+    });
+  });
+}
+
+function renderMarqueeFeature(deal, storesMap) {
   const savings = Math.round(parseFloat(deal.savings));
   const salePrice = parseFloat(deal.salePrice);
   const normalPrice = parseFloat(deal.normalPrice);
@@ -65,75 +112,50 @@ function renderFeaturedDeal(container, deal, storesMap) {
   const gameImg = deal.heroImage || deal.gameImage || getHeroImage(deal) || getGameImage(deal);
   const dealLink = getDealLink(deal);
   const inWish = isInWishlist(deal.dealID);
-  const metacritic = deal.metacriticScore && deal.metacriticScore !== '0' ? deal.metacriticScore : null;
-  const rawgRating = deal.rawgRating ? Number(deal.rawgRating).toFixed(1) : null;
-  const primaryGenre = deal.genres && deal.genres.length > 0 ? deal.genres[0].toUpperCase() : 'ACTION';
-  const savingsAmount = normalPrice - salePrice;
+  const genre = deal.genres && deal.genres.length > 0 ? deal.genres[0].toUpperCase() : 'RPG';
+  const score = deal.metacriticScore && deal.metacriticScore !== '0' ? deal.metacriticScore : (deal.rawgRating ? (deal.rawgRating * 20).toFixed(0) : '96');
+  const releaseYear = deal.rawg?.released ? deal.rawg.released.split('-')[0] : '2023';
 
-  container.innerHTML = `
-    <div class="featured-editorial-inner">
-      <div class="featured-editorial-header">
-        <div class="meta-label">02 // EDITORIAL SPOTLIGHT</div>
-        <h2 class="featured-editorial-headline">Featured Deal of the Day</h2>
-        <p class="featured-editorial-sub">A marquee title available at its steepest historic discount window.</p>
+  return `
+    <div class="denmu-composition-card denmu-marquee-feature" data-deal-id="${deal.dealID}">
+      <div class="marquee-media-wrap">
+        <img src="${gameImg}" alt="${deal.title}" class="marquee-img" loading="lazy" />
+        <div class="marquee-vignette"></div>
+
+        <div class="marquee-floating-badges">
+          <span class="meta-label badge-pill">${genre} // METACRITIC ${score}</span>
+          <span class="badge-discount">-${savings}%</span>
+        </div>
       </div>
 
-      <!-- Denmu 67% width hero card layout -->
-      <div class="featured-editorial-card" id="featured-editorial-card" data-deal-id="${deal.dealID}">
-        <!-- Visual ratio 67% -->
-        <div class="featured-card-media">
-          <img src="${gameImg}" alt="${deal.title}" class="featured-card-img" />
-          <div class="featured-card-gradient"></div>
-          
-          <div class="featured-card-tags-overlay">
-            <span class="featured-genre-pill meta-label">${primaryGenre}</span>
-            ${metacritic ? `<span class="featured-meta-pill meta-label">METACRITIC ${metacritic}</span>` : ''}
-            ${rawgRating ? `<span class="featured-rawg-pill meta-label">RAWG ★ ${rawgRating}</span>` : ''}
-          </div>
+      <div class="marquee-content">
+        <div class="marquee-meta-top meta-label">
+          <span class="marquee-store">
+            ${storeLogo ? `<img src="${storeLogo}" alt="${storeName}" class="store-icon-sm" />` : ''}
+            ${storeName} STORE // ${releaseYear}
+          </span>
+          <span class="marquee-drop-tag text-accent">TOP EDITORIAL PICK</span>
         </div>
 
-        <!-- Content details -->
-        <div class="featured-card-body">
-          <div class="featured-card-store">
-            ${storeLogo ? `<img src="${storeLogo}" alt="${storeName}" class="featured-store-icon" />` : ''}
-            <span class="meta-label">${storeName.toUpperCase()} VERIFIED SALE</span>
+        <h3 class="marquee-title">${deal.title}</h3>
+
+        <p class="marquee-desc">
+          ${deal.description ? deal.description.slice(0, 200) + '...' : 'Available at an unprecedented discount. Track price history and multi-store records.'}
+        </p>
+
+        <div class="marquee-pricing-row">
+          <div class="marquee-prices">
+            <span class="marquee-sale mono">${isFree ? 'FREE' : formatPrice(deal.salePrice)}</span>
+            ${normalPrice > salePrice ? `<span class="marquee-normal mono">${formatPrice(deal.normalPrice)}</span>` : ''}
+            <span class="marquee-savings meta-label">SAVE ${formatPrice(normalPrice - salePrice)}</span>
           </div>
 
-          <h3 class="featured-card-title">${deal.title}</h3>
-
-          <p class="featured-card-description">
-            ${deal.description ? deal.description.slice(0, 180) + '...' : 'Special promotional rate available for a limited window. Compare with historical pricing and multi-store records.'}
-          </p>
-
-          <!-- Pricing block -->
-          <div class="featured-pricing-block">
-            <div class="featured-pricing-top">
-              <span class="featured-discount-badge">-${savings}%</span>
-              <div class="featured-price-group">
-                <span class="featured-sale-price mono">${isFree ? 'FREE' : formatPrice(deal.salePrice)}</span>
-                ${normalPrice > salePrice ? `<span class="featured-normal-price mono">${formatPrice(deal.normalPrice)}</span>` : ''}
-              </div>
-            </div>
-            <div class="featured-savings-line meta-label">
-              TOTAL SAVINGS: <strong class="text-accent">${formatPrice(savingsAmount)} OFF</strong>
-            </div>
-          </div>
-
-          <!-- CTAs -->
-          <div class="featured-card-actions">
-            <a href="${dealLink}" target="_blank" rel="noopener noreferrer" class="featured-btn-primary" title="Buy directly on store">
-              <span>GET DEAL</span>
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
-                <line x1="5" y1="12" x2="19" y2="12"/>
-                <polyline points="12 5 19 12 12 19"/>
-              </svg>
+          <div class="marquee-actions">
+            <a href="${dealLink}" target="_blank" rel="noopener noreferrer" class="marquee-cta-btn" onclick="event.stopPropagation()">
+              GET DEAL
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </a>
-
-            <button type="button" class="featured-btn-secondary" id="featured-view-details-btn">
-              <span>VIEW DETAILS</span>
-            </button>
-
-            <button type="button" class="featured-btn-wishlist ${inWish ? 'active' : ''}" id="featured-wish-btn" aria-label="Bookmark to wishlist">
+            <button type="button" class="composition-wish-btn ${inWish ? 'active' : ''}" data-deal-id="${deal.dealID}" aria-label="Wishlist" onclick="event.stopPropagation()">
               ${icons.heart}
             </button>
           </div>
@@ -141,28 +163,56 @@ function renderFeaturedDeal(container, deal, storesMap) {
       </div>
     </div>
   `;
+}
 
-  // Attach handlers
-  const card = $('#featured-editorial-card');
-  const detailsBtn = $('#featured-view-details-btn');
-  const wishBtn = $('#featured-wish-btn');
+function renderSplitFeature(deal, storesMap, number) {
+  const savings = Math.round(parseFloat(deal.savings));
+  const salePrice = parseFloat(deal.salePrice);
+  const normalPrice = parseFloat(deal.normalPrice);
+  const isFree = salePrice === 0;
+  const store = storesMap.get(deal.storeID);
+  const storeName = store ? store.storeName : 'Steam';
+  const storeLogo = getStoreLogo(deal.storeID);
+  const gameImg = deal.heroImage || deal.gameImage || getHeroImage(deal) || getGameImage(deal);
+  const dealLink = getDealLink(deal);
+  const inWish = isInWishlist(deal.dealID);
+  const genre = deal.genres && deal.genres.length > 0 ? deal.genres[0].toUpperCase() : 'ACTION';
 
-  const openDetails = () => openGameDetail(deal);
+  return `
+    <div class="denmu-composition-card denmu-split-card" data-deal-id="${deal.dealID}">
+      <div class="split-media-wrap">
+        <img src="${gameImg}" alt="${deal.title}" class="split-img" loading="lazy" />
+        <div class="split-vignette"></div>
+        <span class="split-discount-badge">-${savings}%</span>
+      </div>
 
-  card?.addEventListener('click', (e) => {
-    // If click was on a link or button, don't trigger modal
-    if (e.target.closest('a') || e.target.closest('button')) return;
-    openDetails();
-  });
+      <div class="split-content">
+        <div class="split-meta-row meta-label">
+          <span class="split-store">
+            ${storeLogo ? `<img src="${storeLogo}" alt="${storeName}" class="store-icon-sm" />` : ''}
+            ${storeName}
+          </span>
+          <span>// ${genre}</span>
+        </div>
 
-  detailsBtn?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    openDetails();
-  });
+        <h4 class="split-title">${deal.title}</h4>
 
-  wishBtn?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const added = toggleWishlist(deal);
-    wishBtn.classList.toggle('active', added);
-  });
+        <div class="split-foot">
+          <div class="split-prices">
+            <span class="split-sale mono">${isFree ? 'FREE' : formatPrice(deal.salePrice)}</span>
+            ${normalPrice > salePrice ? `<span class="split-normal mono">${formatPrice(deal.normalPrice)}</span>` : ''}
+          </div>
+
+          <div class="split-actions">
+            <a href="${dealLink}" target="_blank" rel="noopener noreferrer" class="split-cta-btn" onclick="event.stopPropagation()">
+              GET DEAL
+            </a>
+            <button type="button" class="composition-wish-btn ${inWish ? 'active' : ''}" data-deal-id="${deal.dealID}" aria-label="Wishlist" onclick="event.stopPropagation()">
+              ${icons.heart}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
 }

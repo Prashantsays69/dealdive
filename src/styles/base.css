@@ -1,75 +1,92 @@
 /* ============================================================
-   Base Styles — AMIX Architecture
+   DealDive Base Styles — Denmu Editorial System
    ============================================================ */
 
-html, body {
-  font-family: var(--font-body);
-  font-size: var(--text-body);
-  color: var(--color-text);
-  background-color: var(--color-bg);
-  letter-spacing: var(--tracking-normal);
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
-/* Background WebGL canvas */
+html {
+  font-family: var(--font-body);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  line-height: var(--leading-normal);
+  overflow-x: hidden;
+  position: relative;
+  min-height: 100vh;
+}
+
+body.no-scroll {
+  overflow: hidden;
+}
+
+/* Three.js Canvas in Background */
 #gl {
   position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-  z-index: 0;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: var(--z-canvas);
   pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.5s ease;
 }
-html.no-gl #gl { display: none; }
 
-/* Film Grain Texture */
+html.no-gl #gl {
+  opacity: 0;
+}
+
+/* Subtle Film Grain */
 .grain {
   position: fixed;
-  inset: -50%;
-  z-index: 2;
+  inset: 0;
+  z-index: 5;
   pointer-events: none;
-  opacity: 0.045;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 }
 
-/* Scroll progress indicator */
+/* Scroll Progress */
 .progress {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 2px;
-  z-index: 50;
-  background: linear-gradient(90deg, var(--color-accent, #C8FF3D), #858580);
-  transform-origin: 0 0;
+  background: var(--color-accent);
+  z-index: 101;
+  transform-origin: left;
   transform: scaleX(0);
   pointer-events: none;
 }
 
-/* Content layer */
+/* Main Content Layer */
 .content {
   position: relative;
   z-index: 10;
   width: 100%;
 }
 
-/* Pointer-event handling when WebGL canvas is in background */
+/* Pointer-events: ensure canvas in back doesn't block interactive sections */
 html.gl-on .content { pointer-events: none; }
-html.gl-on .content .hero-editorial-container,
-html.gl-on .content .hero-inner,
-html.gl-on .content .featured-editorial-inner,
-html.gl-on .content .best-deals-inner,
-html.gl-on .content .trending-inner,
-html.gl-on .content .categories-inner,
-html.gl-on .content .store-tabs-inner,
-html.gl-on .content .catalog-inner,
-html.gl-on .content .cta-inner,
-html.gl-on .content .footer-inner,
+html.gl-on .content .denmu-hero-stage,
+html.gl-on .content .denmu-featured-inner,
+html.gl-on .content .denmu-categories-inner,
+html.gl-on .content .discovery-inner,
+html.gl-on .content .denmu-footer-inner,
 html.gl-on .site-head,
 .mobile-nav-drawer,
 .search-modal,
@@ -88,29 +105,13 @@ html.gl-on .site-head,
   color: var(--color-accent-fg);
 }
 
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 5px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: var(--radius-full);
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
 /* Typography Utility Classes */
 .meta-label {
   font-family: var(--font-mono);
-  font-size: clamp(10px, 1.2vw, 11px);
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  letter-spacing: 0.22em;
-  color: var(--color-muted);
 }
 
 .mono {
@@ -118,9 +119,29 @@ html.gl-on .site-head,
 }
 
 .text-accent {
+  color: var(--color-accent) !important;
+}
+
+.brand-accent {
   color: var(--color-accent);
 }
 
-.text-muted {
-  color: var(--color-muted);
+.status-pulse-accent {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 8px var(--color-accent);
+  margin-right: 6px;
+}
+
+.status-pulse-green {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #34D399;
+  box-shadow: 0 0 8px #34D399;
+  margin-right: 6px;
 }

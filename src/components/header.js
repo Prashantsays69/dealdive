@@ -1,10 +1,10 @@
 /* ============================================================
-   Header Component — Denmu-Style Minimal Floating Navigation
-   DealDive logo + Deals + Trending + Stores + Wishlist + Search
-   + Compact mobile slide-out navigation.
+   Minimal Nav — Denmu Editorial Navigation
+   Logo + Deals / Trending / Stores / Wishlist + Search icon
+   Clean, typography-driven, no dominating pills.
    ============================================================ */
 
-import { $, el, icons } from '../utils/dom.js';
+import { $, icons } from '../utils/dom.js';
 import { toggle3DMode } from '../3d/scene3d.js';
 
 export function initHeader({ onSearchClick, onWishlistClick }) {
@@ -13,170 +13,130 @@ export function initHeader({ onSearchClick, onWishlistClick }) {
   if (!header) return;
 
   header.innerHTML = `
-    <div class="site-head-inner">
-      <a href="/" class="site-head-brand" id="header-brand">
+    <div class="site-nav-container">
+      <a href="/" class="site-brand" id="header-brand">
         DEAL<span class="brand-accent">DIVE</span>
       </a>
 
-      <nav class="site-head-nav" aria-label="Main Navigation">
-        <a href="#featured-deal" class="site-head-link" data-target="featured-deal">FEATURED</a>
-        <a href="#best-deals" class="site-head-link" data-target="best-deals">DEALS</a>
-        <a href="#trending" class="site-head-link" data-target="trending">TRENDING</a>
-        <a href="#store-tabs" class="site-head-link" data-target="store-tabs">STORES</a>
-        <button type="button" class="site-head-link wishlist-link-btn" id="header-wishlist-btn" title="Open Wishlist">
-          WISHLIST <span class="wishlist-badge" id="wishlist-count">0</span>
+      <nav class="site-nav-links" aria-label="Primary Navigation">
+        <a href="#featured" class="site-nav-item">Deals</a>
+        <a href="#categories" class="site-nav-item">Trending</a>
+        <a href="#discovery" class="site-nav-item" data-target="stores">Stores</a>
+        <button type="button" class="site-nav-item site-nav-btn" id="header-wishlist-btn">
+          Wishlist <span class="nav-wishlist-count" id="wishlist-count">0</span>
         </button>
       </nav>
 
-      <div class="site-head-right">
-        <button type="button" class="gl-toggle-btn" id="glToggle" aria-pressed="true" title="Toggle 3D visual depth">
-          3D <span>ON</span>
+      <div class="site-nav-actions">
+        <button type="button" class="nav-gl-toggle" id="glToggle" aria-pressed="true" title="Toggle 3D Depth">
+          3D <span class="gl-status-dot"></span>
         </button>
 
-        <button type="button" class="site-head-search-btn" id="header-search-btn" aria-label="Search games" title="Search games (⌘K)">
-          ${icons.search}
-          <span class="search-kbd">⌘K</span>
+        <button type="button" class="nav-icon-btn" id="header-search-btn" aria-label="Search" title="Search games (⌘K)">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
         </button>
 
-        <!-- Mobile hamburger toggle -->
-        <button type="button" class="mobile-nav-toggle" id="mobile-menu-btn" aria-label="Open mobile menu">
-          <span class="bar"></span>
-          <span class="bar"></span>
+        <button type="button" class="nav-mobile-toggle" id="mobile-menu-btn" aria-label="Open Menu">
+          <span></span>
+          <span></span>
         </button>
       </div>
     </div>
   `;
 
-  // Render Mobile Navigation Drawer
+  // Mobile Drawer
   if (mobileDrawer) {
     mobileDrawer.innerHTML = `
-      <div class="mobile-nav-backdrop" id="mobile-nav-backdrop"></div>
-      <div class="mobile-nav-content">
-        <div class="mobile-nav-top">
-          <span class="mobile-nav-brand">DEAL<span class="brand-accent">DIVE</span></span>
-          <button type="button" class="mobile-nav-close" id="mobile-nav-close" aria-label="Close menu">
+      <div class="mobile-drawer-backdrop" id="mobile-drawer-backdrop"></div>
+      <div class="mobile-drawer-panel">
+        <div class="mobile-drawer-head">
+          <span class="site-brand">DEAL<span class="brand-accent">DIVE</span></span>
+          <button type="button" class="mobile-drawer-close" id="mobile-drawer-close" aria-label="Close">
             ${icons.x}
           </button>
         </div>
-
-        <nav class="mobile-nav-links">
-          <a href="#featured-deal" class="mobile-nav-item" data-target="featured-deal">
-            <span class="mobile-nav-num">01</span>
-            <span class="mobile-nav-label">FEATURED DEAL</span>
-          </a>
-          <a href="#best-deals" class="mobile-nav-item" data-target="best-deals">
-            <span class="mobile-nav-num">02</span>
-            <span class="mobile-nav-label">BEST DEALS</span>
-          </a>
-          <a href="#trending" class="mobile-nav-item" data-target="trending">
-            <span class="mobile-nav-num">03</span>
-            <span class="mobile-nav-label">TRENDING</span>
-          </a>
-          <a href="#deal-categories" class="mobile-nav-item" data-target="deal-categories">
-            <span class="mobile-nav-num">04</span>
-            <span class="mobile-nav-label">CATEGORIES</span>
-          </a>
-          <a href="#store-tabs" class="mobile-nav-item" data-target="store-tabs">
-            <span class="mobile-nav-num">05</span>
-            <span class="mobile-nav-label">STOREFRONTS</span>
-          </a>
-          <a href="#catalog" class="mobile-nav-item" data-target="catalog">
-            <span class="mobile-nav-num">06</span>
-            <span class="mobile-nav-label">ALL DEALS</span>
-          </a>
-        </nav>
-
-        <div class="mobile-nav-bottom">
-          <button type="button" class="mobile-nav-action-btn" id="mobile-wishlist-btn">
-            ${icons.heart}
-            <span>WISHLIST</span>
-            <span class="wishlist-badge" id="mobile-wishlist-count">0</span>
+        <div class="mobile-drawer-nav">
+          <a href="#featured" class="mobile-drawer-link">Deals</a>
+          <a href="#categories" class="mobile-drawer-link">Trending</a>
+          <a href="#discovery" class="mobile-drawer-link">Stores</a>
+          <a href="#discovery" class="mobile-drawer-link">Game Discovery</a>
+        </div>
+        <div class="mobile-drawer-foot">
+          <button type="button" class="mobile-action-btn" id="mob-wishlist-btn">
+            Wishlist (<span id="mob-wishlist-count">0</span>)
           </button>
-          <button type="button" class="mobile-nav-action-btn" id="mobile-search-btn">
-            ${icons.search}
-            <span>SEARCH GAMES</span>
+          <button type="button" class="mobile-action-btn" id="mob-search-btn">
+            Search games
           </button>
         </div>
       </div>
     `;
 
-    const openMobile = () => {
+    const openDrawer = () => {
       mobileDrawer.classList.add('open');
       mobileDrawer.setAttribute('aria-hidden', 'false');
       document.body.classList.add('no-scroll');
     };
-
-    const closeMobile = () => {
+    const closeDrawer = () => {
       mobileDrawer.classList.remove('open');
       mobileDrawer.setAttribute('aria-hidden', 'true');
       document.body.classList.remove('no-scroll');
     };
 
-    $('#mobile-menu-btn')?.addEventListener('click', openMobile);
-    $('#mobile-nav-close')?.addEventListener('click', closeMobile);
-    $('#mobile-nav-backdrop')?.addEventListener('click', closeMobile);
+    $('#mobile-menu-btn')?.addEventListener('click', openDrawer);
+    $('#mobile-drawer-close')?.addEventListener('click', closeDrawer);
+    $('#mobile-drawer-backdrop')?.addEventListener('click', closeDrawer);
 
-    mobileDrawer.querySelectorAll('.mobile-nav-item').forEach(item => {
-      item.addEventListener('click', (e) => {
+    mobileDrawer.querySelectorAll('.mobile-drawer-link').forEach(link => {
+      link.addEventListener('click', (e) => {
         e.preventDefault();
-        closeMobile();
-        const targetId = item.dataset.target;
-        const targetEl = document.getElementById(targetId);
-        if (targetEl) {
-          targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        closeDrawer();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     });
 
-    $('#mobile-wishlist-btn')?.addEventListener('click', () => {
-      closeMobile();
+    $('#mob-wishlist-btn')?.addEventListener('click', () => {
+      closeDrawer();
       onWishlistClick();
     });
-
-    $('#mobile-search-btn')?.addEventListener('click', () => {
-      closeMobile();
+    $('#mob-search-btn')?.addEventListener('click', () => {
+      closeDrawer();
       onSearchClick();
     });
   }
 
-  // Header scroll state
-  window.addEventListener('scroll', () => {
-    header.classList.toggle('scrolled', window.scrollY > 30);
-  }, { passive: true });
-
-  // Search button
-  $('#header-search-btn')?.addEventListener('click', onSearchClick);
-
-  // Wishlist button
-  $('#header-wishlist-btn')?.addEventListener('click', onWishlistClick);
-
-  // 3D Toggle
-  const toggleBtn = $('#glToggle');
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => {
-      const isNowOn = toggle3DMode();
-      toggleBtn.setAttribute('aria-pressed', String(isNowOn));
-      const span = toggleBtn.querySelector('span');
-      if (span) {
-        span.textContent = isNowOn ? 'ON' : 'OFF';
-        span.style.color = isNowOn ? '#C7FF3D' : '#FF5B55';
-      }
-    });
-  }
-
   // Smooth scroll links
-  header.querySelectorAll('.site-head-link[data-target]').forEach(link => {
+  header.querySelectorAll('.site-nav-item[href]').forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
-      const targetId = link.dataset.target;
-      const targetEl = document.getElementById(targetId);
-      if (targetEl) {
-        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+      const targetId = link.getAttribute('href');
+      const targetEl = document.querySelector(targetId);
+      if (targetEl) targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   });
 
-  // Keyboard shortcut: / or Ctrl+K / Cmd+K
+  // Events
+  $('#header-search-btn')?.addEventListener('click', onSearchClick);
+  $('#header-wishlist-btn')?.addEventListener('click', onWishlistClick);
+
+  // 3D toggle
+  const toggleBtn = $('#glToggle');
+  toggleBtn?.addEventListener('click', () => {
+    const isNowOn = toggle3DMode();
+    toggleBtn.setAttribute('aria-pressed', String(isNowOn));
+    toggleBtn.classList.toggle('gl-off', !isNowOn);
+  });
+
+  // Scroll style
+  window.addEventListener('scroll', () => {
+    header.classList.toggle('scrolled', window.scrollY > 20);
+  }, { passive: true });
+
+  // Key shortcuts
   document.addEventListener('keydown', (e) => {
     if ((e.key === '/' && !isInputFocused()) || ((e.ctrlKey || e.metaKey) && e.key === 'k')) {
       e.preventDefault();
@@ -185,20 +145,11 @@ export function initHeader({ onSearchClick, onWishlistClick }) {
   });
 }
 
-/**
- * Update wishlist count badge in desktop and mobile header
- */
 export function updateWishlistCount(count) {
   const badge = $('#wishlist-count');
-  const mobBadge = $('#mobile-wishlist-count');
-  if (badge) {
-    badge.textContent = count;
-    badge.classList.toggle('has-items', count > 0);
-  }
-  if (mobBadge) {
-    mobBadge.textContent = count;
-    mobBadge.classList.toggle('has-items', count > 0);
-  }
+  const mobBadge = $('#mob-wishlist-count');
+  if (badge) badge.textContent = count;
+  if (mobBadge) mobBadge.textContent = count;
 }
 
 function isInputFocused() {

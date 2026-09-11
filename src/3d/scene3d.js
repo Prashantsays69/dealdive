@@ -227,14 +227,10 @@ function buildCamPoses() {
   if (isMobile) {
     camPoses = {
       hero: { pos: new THREE.Vector3(0, 1.2, 7.5), look: new THREE.Vector3(0, 1.0, -6) },
-      'featured-deal': { pos: new THREE.Vector3(0, 1.8, -6.0), look: new THREE.Vector3(0, 0.8, -12.0) },
-      'best-deals': { pos: new THREE.Vector3(0, 2.2, -18.0), look: new THREE.Vector3(0, 0.8, -25.0) },
-      trending: { pos: new THREE.Vector3(0, 2.2, -28.0), look: new THREE.Vector3(0, 0.8, -35.0) },
-      categories: { pos: new THREE.Vector3(0, 1.8, -38.0), look: new THREE.Vector3(0, 0.6, -44.0) },
-      stores: { pos: new THREE.Vector3(0, 1.8, -46.0), look: new THREE.Vector3(0, 0.5, -52.0) },
-      catalog: { pos: new THREE.Vector3(0, 1.5, -54.0), look: new THREE.Vector3(0, 0.5, -60.0) },
-      cta: { pos: new THREE.Vector3(0, 2.5, -62.0), look: new THREE.Vector3(0, 2.0, -69.0) },
-      foot: { pos: new THREE.Vector3(0, 3.0, -65.0), look: new THREE.Vector3(0, 2.5, -73.0) },
+      featured: { pos: new THREE.Vector3(0, 1.8, -6.0), look: new THREE.Vector3(0, 0.8, -12.0) },
+      categories: { pos: new THREE.Vector3(0, 2.0, -18.0), look: new THREE.Vector3(0, 0.8, -25.0) },
+      discovery: { pos: new THREE.Vector3(0, 1.5, -30.0), look: new THREE.Vector3(0, 0.6, -38.0) },
+      foot: { pos: new THREE.Vector3(0, 3.0, -42.0), look: new THREE.Vector3(0, 2.5, -50.0) },
     };
     return;
   }
@@ -242,14 +238,10 @@ function buildCamPoses() {
   // Desktop Cinematic Angles (Subtle Denmu + AMIX depth)
   camPoses = {
     hero: { pos: new THREE.Vector3(0, 1.4, 8.5), look: new THREE.Vector3(0, 1.0, -5.0) },
-    'featured-deal': { pos: new THREE.Vector3(-1.2, 1.6, -6.0), look: new THREE.Vector3(1.8, 0.8, -12.0) },
-    'best-deals': { pos: new THREE.Vector3(1.2, 1.8, -18.0), look: new THREE.Vector3(-1.8, 0.8, -25.0) },
-    trending: { pos: new THREE.Vector3(0, 2.2, -28.0), look: new THREE.Vector3(0, 0.7, -35.0) },
-    categories: { pos: new THREE.Vector3(0, 1.6, -38.0), look: new THREE.Vector3(0, 0.6, -44.0) },
-    stores: { pos: new THREE.Vector3(0, 1.8, -46.0), look: new THREE.Vector3(0, 0.8, -52.0) },
-    catalog: { pos: new THREE.Vector3(0, 1.2, -54.0), look: new THREE.Vector3(0, 0.6, -60.0) },
-    cta: { pos: new THREE.Vector3(0, 3.5, -62.0), look: new THREE.Vector3(0, 3.8, -70.0) },
-    foot: { pos: new THREE.Vector3(0, 4.0, -65.0), look: new THREE.Vector3(0, 4.2, -73.0) },
+    featured: { pos: new THREE.Vector3(-1.0, 1.5, -6.0), look: new THREE.Vector3(1.5, 0.8, -12.0) },
+    categories: { pos: new THREE.Vector3(1.0, 1.6, -18.0), look: new THREE.Vector3(-1.5, 0.8, -25.0) },
+    discovery: { pos: new THREE.Vector3(0, 1.3, -30.0), look: new THREE.Vector3(0, 0.6, -38.0) },
+    foot: { pos: new THREE.Vector3(0, 3.5, -42.0), look: new THREE.Vector3(0, 3.2, -50.0) },
   };
 }
 

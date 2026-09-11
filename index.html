@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>DealDive — Game Deals Aggregator</title>
-  <meta name="description" content="Discover the best PC game deals across Steam, Epic, GOG and more. Compare prices, track discounts, and never overpay for games." />
+  <title>DealDive — Editorial PC Game Deals &amp; Intelligence</title>
+  <meta name="description" content="Discover the best PC game deals across Steam, Epic, GOG and authorized storefronts. Real-time pricing intelligence, price history and verified discounts." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -12,50 +12,45 @@
   <script type="module" src="/src/main.js"></script>
 </head>
 <body>
-  <!-- Scroll Progress Bar -->
+  <!-- Scroll Progress Indicator -->
   <div class="progress" id="scroll-progress" aria-hidden="true"></div>
 
-  <!-- Subtle Film Grain Overlay -->
+  <!-- Subtle Grain Overlay -->
   <div class="grain" aria-hidden="true"></div>
 
-  <!-- Three.js WebGL Canvas -->
+  <!-- WebGL 3D Background Canvas -->
   <canvas id="gl" aria-hidden="true"></canvas>
 
-  <!-- Navigation -->
+  <!-- 1. MINIMAL NAV -->
   <header class="site-head" id="site-header"></header>
 
-  <!-- Mobile Navigation Drawer -->
+  <!-- Mobile Slide-out Drawer -->
   <div class="mobile-nav-drawer" id="mobile-nav-drawer" aria-hidden="true"></div>
 
-  <div class="content" id="content">
-    <!-- 01 — CINEMATIC HERO -->
-    <section class="section hero" id="hero" data-cam="hero"></section>
+  <!-- MAIN EDITORIAL CONTENT -->
+  <main class="content" id="content">
+    <!-- 2. EDITORIAL HERO -->
+    <section class="section hero-section" id="hero" data-cam="hero"></section>
 
-    <!-- 02 — FEATURED DEAL: Massive editorial showcase -->
-    <section class="section featured-deal-section" id="featured-deal" data-cam="featured-deal"></section>
+    <!-- 3. FEATURED DEALS (Large asymmetric editorial compositions) -->
+    <section class="section featured-section" id="featured" data-cam="featured"></section>
 
-    <!-- 03 — BEST DEALS: Editorial asymmetric grid -->
-    <section class="section best-deals-section" id="best-deals" data-cam="best-deals"></section>
+    <!-- 4. DEAL CATEGORIES (Horizontal editorial sections) -->
+    <section class="section categories-section" id="categories" data-cam="categories"></section>
 
-    <!-- 04 — TRENDING: High-rating / discount velocity -->
-    <section class="section trending-section" id="trending" data-cam="trending"></section>
-
-    <!-- 05 — DEAL CATEGORIES: Quick genre access -->
-    <section class="section deal-categories-section" id="deal-categories" data-cam="categories"></section>
-
-    <!-- 06 — STORE TABS: Horizontal verified platforms -->
-    <section class="section store-tabs-section" id="store-tabs" data-cam="stores"></section>
-
-    <!-- 07 — ALL DEALS: Catalog & filters -->
-    <section class="section catalog-section" id="catalog" data-cam="catalog">
-      <div class="catalog-inner">
-        <div class="catalog-header">
-          <div class="meta-label">CATALOG &amp; FILTER // ALL STORES</div>
-          <h2 class="catalog-title">Explore All Game Deals</h2>
-          <p class="catalog-sub">Real-time prices from Steam, Epic, GOG, and verified storefronts. Filter by price, rating, or store.</p>
+    <!-- 5. GAME DISCOVERY (Searchable catalog + compact store tabs & filters) -->
+    <section class="section discovery-section" id="discovery" data-cam="discovery">
+      <div class="discovery-inner">
+        <div class="discovery-header">
+          <span class="meta-label">03 // GAME DISCOVERY &amp; CATALOG</span>
+          <h2 class="discovery-title">Search &amp; Filter All Deals</h2>
+          <p class="discovery-sub">Real-time authorized pricing from Steam, Epic, GOG, and verified merchants.</p>
         </div>
 
-        <!-- Filter Bar -->
+        <!-- Compact Horizontal Store Tabs -->
+        <div id="store-tabs" class="store-tabs-wrapper"></div>
+
+        <!-- Compact Functional Filter Bar -->
         <div id="filter-bar" class="filter-bar"></div>
 
         <!-- Deals Grid -->
@@ -66,12 +61,9 @@
       </div>
     </section>
 
-    <!-- 08 — FINAL CTA: Denmu-style typographic statement -->
-    <section class="section cta-section" id="cta" data-cam="cta"></section>
-
-    <!-- 09 — FOOTER: Minimal 4-column footer -->
+    <!-- 6. FOOTER (Large typography, minimal links, brand statement) -->
     <footer class="section site-foot" id="foot" data-cam="foot"></footer>
-  </div>
+  </main>
 
   <!-- Search Modal -->
   <div id="search-modal" class="search-modal" aria-hidden="true"></div>
