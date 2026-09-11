@@ -62,12 +62,14 @@ html.no-gl #gl { display: none; }
 html.gl-on .content { pointer-events: none; }
 html.gl-on .content .hero-inner,
 html.gl-on .content .deal-card,
+html.gl-on .content .best-deals-inner,
 html.gl-on .content .trending-inner,
 html.gl-on .content .stores-inner,
 html.gl-on .content .catalog-inner,
 html.gl-on .content .cta-inner,
 html.gl-on .content .footer-inner,
-html.gl-on .site-head { pointer-events: auto; }
+html.gl-on .site-head,
+.game-detail-modal { pointer-events: auto; }
 
 /* Base Section */
 .section {

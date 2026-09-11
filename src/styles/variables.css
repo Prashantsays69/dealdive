@@ -3,22 +3,25 @@
    ============================================================ */
 
 :root {
-  /* ---- Colors ---- */
-  --color-bg:       #080808;
-  --color-text:     #F2F0EA;
-  --color-surface:  #141414;
-  --color-muted:    #858580;
-  --color-border:   rgba(255, 255, 255, 0.12);
-  --color-accent:   #C8FF3D;
-  --color-sale:     #FF5B55;
+  /* ---- Colors per ui.txt ---- */
+  --color-bg:               #08090A;
+  --color-surface:          #101214;
+  --color-surface-elevated: #151719;
+  --color-text:             #F5F5F0;
+  --color-secondary:        #8B8E91;
+  --color-muted:            #8B8E91;
+  --color-border:           rgba(255, 255, 255, 0.10);
+  --color-accent:           #C8FF3D;
+  --color-accent-hover:     #D9FF70;
+  --color-sale:             #FF5B55;
 
-  --color-accent-dark: #A8E020;
-  --color-accent-fg:   #080808;
-  --color-surface-hover: #1c1c1c;
-  --color-overlay:  rgba(8, 8, 8, 0.85);
-  --color-skeleton: #1a1a1a;
-  --color-skeleton-shine: #252525;
-  --color-card:     #141414;
+  --color-accent-dark:      #A8E020;
+  --color-accent-fg:        #08090A;
+  --color-surface-hover:    #151719;
+  --color-overlay:          rgba(8, 9, 10, 0.85);
+  --color-skeleton:         #101214;
+  --color-skeleton-shine:   #1a1c1e;
+  --color-card:             #101214;
 
   /* ---- Typography ---- */
   --font-display: 'Inter', sans-serif;

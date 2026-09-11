@@ -19,8 +19,10 @@ import { fetchStores } from './api/cheapshark.js';
 import { initHeader } from './components/header.js';
 import { initHeroImmersive } from './components/heroImmersive.js';
 import { initDealSections } from './components/dealSection.js';
+import { initBestDealsGallery } from './components/bestDealsGallery.js';
 import { initTrendingCards } from './components/trendingCards.js';
 import { initPlatformSection } from './components/platformSection.js';
+import { initGameDetailModal } from './components/gameDetailModal.js';
 import { initFilters } from './components/filters.js';
 import { initDealGrid, refreshGrid } from './components/dealGrid.js';
 import { initSearch, openSearch } from './components/search.js';
@@ -48,19 +50,25 @@ async function init() {
     onWishlistClick: openWishlist,
   });
 
-  // 4. Init Hero (AMIX typography + floating artwork planes)
+  // 4. Init Game Detail Modal (for interactive magazine inspection)
+  initGameDetailModal({ storesMap });
+
+  // 5. 02 — HERO (AMIX typography + floating artwork planes)
   await initHeroImmersive({
     onSearchClick: openSearch,
     storesMap,
   });
 
-  // 5. Init Deal Sections (DEAL 01 through DEAL 04 in dedicated viewports)
+  // 6. 03 — Featured Deal cinematic scenes (DEAL 01 through DEAL 04)
   await initDealSections({ storesMap });
 
-  // 6. Init Trending Cards (Layered 3D cards)
+  // 7. 04 — BEST DEALS (Curated Bargains Gallery)
+  await initBestDealsGallery({ storesMap });
+
+  // 8. 05 — TRENDING / DISCOVER (Layered 3D cards)
   await initTrendingCards({ storesMap });
 
-  // 7. Init Platform Section (Store monoliths)
+  // 9. 06 — STORES / PLATFORMS (Store monoliths)
   initPlatformSection({ stores });
 
   // 8. Init Filters (Preserved CheapShark filter bar)

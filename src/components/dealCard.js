@@ -6,6 +6,7 @@ import { el, lazyImage, icons } from '../utils/dom.js';
 import { formatPrice, formatDiscount, metacriticTier } from '../utils/format.js';
 import { getGameImage, getDealLink, getStoreLogo } from '../api/cheapshark.js';
 import { isInWishlist, toggleWishlist } from './wishlist.js';
+import { openGameDetail } from './gameDetailModal.js';
 
 /**
  * Create a deal card DOM element
@@ -122,9 +123,9 @@ export function createDealCard(deal, storesMap, featured = false, index = 0) {
   card.appendChild(imageContainer);
   card.appendChild(bodyContainer);
 
-  // Card click → open deal
+  // Card click → open cinematic game detail
   card.addEventListener('click', () => {
-    window.open(dealLink, '_blank', 'noopener,noreferrer');
+    openGameDetail(deal);
   });
 
   return card;

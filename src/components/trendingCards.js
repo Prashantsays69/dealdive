@@ -8,6 +8,7 @@ import { formatPrice, formatDiscount } from '../utils/format.js';
 import { fetchDeals, deduplicateDeals, getGameImage, getDealLink, getStoreLogo } from '../api/cheapshark.js';
 import { enrichDealsWithRAWG } from '../api/rawg.js';
 import { isInWishlist, toggleWishlist } from './wishlist.js';
+import { openGameDetail } from './gameDetailModal.js';
 
 export async function initTrendingCards({ storesMap }) {
   const container = $('#trending');
@@ -87,9 +88,17 @@ export async function initTrendingCards({ storesMap }) {
     </div>
   `;
 
+  // Attach card click to open Game Detail
+  container.querySelectorAll('.amix-trending-card').forEach((card, idx) => {
+    card.addEventListener('click', () => {
+      if (deals[idx]) openGameDetail(deals[idx]);
+    });
+  });
+
   // Attach wishlist click listeners
   container.querySelectorAll('.amix-card-wish').forEach((btn) => {
     btn.addEventListener('click', (e) => {
+      e.stopPropagation();
       e.preventDefault();
       const dealId = btn.dataset.dealId;
       const targetDeal = deals.find(d => d.dealID === dealId);

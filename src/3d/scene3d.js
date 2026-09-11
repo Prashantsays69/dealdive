@@ -10,6 +10,7 @@ let canvas, renderer, scene, camera, clock;
 let inited = false;
 let running = false;
 let animationId = null;
+let startTime = 0;
 
 // Devices & State
 const isMobile = window.innerWidth <= 768;
@@ -232,11 +233,12 @@ function buildCamPoses() {
       'deal-02': { pos: new THREE.Vector3(0, 2.2, -13.5), look: new THREE.Vector3(0, 0.6, -17.5) },
       'deal-03': { pos: new THREE.Vector3(0, 2.2, -22.5), look: new THREE.Vector3(0, 0.6, -26.5) },
       'deal-04': { pos: new THREE.Vector3(0, 2.2, -31.5), look: new THREE.Vector3(0, 0.6, -35.5) },
-      trending: { pos: new THREE.Vector3(0, 2.5, -39.0), look: new THREE.Vector3(0, 0.8, -44.0) },
-      stores: { pos: new THREE.Vector3(0, 2.0, -47.0), look: new THREE.Vector3(0, 0.5, -51.0) },
-      catalog: { pos: new THREE.Vector3(0, 1.5, -53.0), look: new THREE.Vector3(0, 0.5, -59.0) },
-      cta: { pos: new THREE.Vector3(0, 2.8, -58.0), look: new THREE.Vector3(0, 2.0, -65.0) },
-      foot: { pos: new THREE.Vector3(0, 3.5, -60.0), look: new THREE.Vector3(0, 3.0, -68.0) },
+      'best-deals': { pos: new THREE.Vector3(0, 2.4, -38.5), look: new THREE.Vector3(0, 0.8, -44.0) },
+      trending: { pos: new THREE.Vector3(0, 2.5, -45.5), look: new THREE.Vector3(0, 0.8, -50.0) },
+      stores: { pos: new THREE.Vector3(0, 2.0, -53.0), look: new THREE.Vector3(0, 0.5, -57.0) },
+      catalog: { pos: new THREE.Vector3(0, 1.5, -59.0), look: new THREE.Vector3(0, 0.5, -65.0) },
+      cta: { pos: new THREE.Vector3(0, 2.8, -64.0), look: new THREE.Vector3(0, 2.0, -71.0) },
+      foot: { pos: new THREE.Vector3(0, 3.5, -66.0), look: new THREE.Vector3(0, 3.0, -74.0) },
     };
     return;
   }
@@ -248,11 +250,12 @@ function buildCamPoses() {
     'deal-02': { pos: new THREE.Vector3(1.8, 1.3, -13.5), look: new THREE.Vector3(-2.4, 0.8, -17.5) },
     'deal-03': { pos: new THREE.Vector3(-1.9, 1.5, -22.5), look: new THREE.Vector3(2.4, 0.7, -26.5) },
     'deal-04': { pos: new THREE.Vector3(1.8, 1.3, -31.5), look: new THREE.Vector3(-2.4, 0.8, -35.5) },
-    trending: { pos: new THREE.Vector3(0, 3.2, -37.5), look: new THREE.Vector3(0, 0.6, -44.0) },
-    stores: { pos: new THREE.Vector3(0, 2.2, -46.5), look: new THREE.Vector3(0, 0.8, -52.0) },
-    catalog: { pos: new THREE.Vector3(0, 1.2, -53.0), look: new THREE.Vector3(0, 0.6, -58.0) },
-    cta: { pos: new THREE.Vector3(0, 4.0, -58.0), look: new THREE.Vector3(0, 4.5, -66.0) },
-    foot: { pos: new THREE.Vector3(0, 4.5, -59.0), look: new THREE.Vector3(0, 4.8, -68.0) },
+    'best-deals': { pos: new THREE.Vector3(0, 2.8, -38.5), look: new THREE.Vector3(0, 0.8, -45.0) },
+    trending: { pos: new THREE.Vector3(0, 3.2, -46.5), look: new THREE.Vector3(0, 0.6, -53.0) },
+    stores: { pos: new THREE.Vector3(0, 2.2, -54.5), look: new THREE.Vector3(0, 0.8, -60.0) },
+    catalog: { pos: new THREE.Vector3(0, 1.2, -61.0), look: new THREE.Vector3(0, 0.6, -66.0) },
+    cta: { pos: new THREE.Vector3(0, 4.0, -66.0), look: new THREE.Vector3(0, 4.5, -74.0) },
+    foot: { pos: new THREE.Vector3(0, 4.5, -67.0), look: new THREE.Vector3(0, 4.8, -76.0) },
   };
 }
 
@@ -378,7 +381,7 @@ function animate() {
 
   if (!renderer || !scene || !camera || !glOn) return;
 
-  const elapsed = clock ? clock.getElapsedTime() : 0;
+  const elapsed = (performance.now() - startTime) * 0.001;
 
   // Smooth mouse lerp
   camState.mouseSmooth.x += (camState.mouse.x - camState.mouseSmooth.x) * 0.05;
@@ -432,7 +435,7 @@ export function initScene3D() {
     document.body.prepend(canvas);
   }
 
-  clock = new THREE.Clock();
+  startTime = performance.now();
 
   // Renderer
   renderer = new THREE.WebGLRenderer({

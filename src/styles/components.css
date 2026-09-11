@@ -1380,7 +1380,635 @@
 }
 
 /* ============================================================
-   10. RESPONSIVE BREAKPOINTS
+   10. BEST DEALS SECTION (04 BEST DEALS)
+   ============================================================ */
+.best-deals-section {
+  align-items: center;
+  min-height: auto;
+  padding-top: 12vh;
+  padding-bottom: 12vh;
+}
+
+.best-deals-inner {
+  width: 100%;
+  max-width: 1240px;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.best-deals-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.best-deals-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(32px, 5.5vw, 64px);
+  letter-spacing: -0.03em;
+  line-height: 1.04;
+}
+
+.best-deals-desc {
+  max-width: 40em;
+  color: var(--color-muted);
+  font-size: 15px;
+}
+
+.best-deals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 22px;
+}
+
+.best-deal-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.best-deal-card:hover {
+  border-color: rgba(200, 255, 61, 0.35);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(200, 255, 61, 0.08);
+}
+
+.best-deal-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 460 / 215;
+  background: #111;
+  overflow: hidden;
+}
+
+.best-deal-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.best-deal-card:hover .best-deal-media img {
+  transform: scale(1.05);
+}
+
+.best-deal-tags {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.best-deal-tag-context {
+  background: rgba(8, 9, 10, 0.82);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--color-text);
+  font-size: 9px;
+  padding: 3px 8px;
+  border-radius: 100px;
+}
+
+.best-deal-tag-discount {
+  background: var(--color-accent);
+  color: var(--color-accent-fg);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.best-deal-body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.best-deal-meta-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.best-deal-store {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.store-icon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+.rawg-score-badge {
+  font-size: 11px;
+  color: var(--color-accent);
+}
+
+.best-deal-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 17px;
+  line-height: 1.25;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.best-deal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 12px;
+}
+
+.best-deal-prices {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.best-deal-sale-price {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.best-deal-orig-price {
+  font-size: 12px;
+  color: var(--color-muted);
+  text-decoration: line-through;
+}
+
+.best-deal-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.best-deal-buy-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--color-text);
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 6px 12px;
+  border-radius: 100px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.best-deal-buy-btn:hover {
+  background: var(--color-accent);
+  color: var(--color-accent-fg);
+  border-color: var(--color-accent);
+}
+
+.best-deal-wish-btn {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-muted);
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.best-deal-wish-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+}
+
+.best-deal-wish-btn.active {
+  color: #FF5B55;
+  border-color: #FF5B55;
+}
+
+.best-deal-wish-btn.active svg {
+  fill: #FF5B55;
+}
+
+/* ============================================================
+   11. CINEMATIC GAME DETAIL MODAL
+   ============================================================ */
+.game-detail-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  background: rgba(8, 9, 10, 0.88);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s;
+}
+
+.game-detail-modal.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.detail-panel {
+  position: relative;
+  width: 100%;
+  max-width: 940px;
+  max-height: 90vh;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.95);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-close-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 20;
+  background: rgba(8, 9, 10, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.detail-close-btn:hover {
+  transform: scale(1.08);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.detail-loading {
+  padding: 80px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.detail-hero-media {
+  position: relative;
+  width: 100%;
+  height: 340px;
+  background: #000;
+  overflow: hidden;
+}
+
+.detail-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.detail-hero-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(8, 9, 10, 0.2) 0%, rgba(16, 18, 20, 0.95) 100%);
+}
+
+.detail-hero-overlay-tags {
+  position: absolute;
+  bottom: 20px;
+  left: 30px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.detail-badge-lowest {
+  background: var(--color-accent);
+  color: var(--color-accent-fg);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 10px;
+}
+
+.detail-badge-alltime {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--color-text);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+.detail-badge-discount {
+  background: #FF5B55;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 10px;
+}
+
+.detail-body {
+  padding: 30px clamp(20px, 4vw, 40px);
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.detail-header-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.detail-rating-pill {
+  font-size: 12px;
+  color: var(--color-accent);
+  background: rgba(200, 255, 61, 0.08);
+  border: 1px solid rgba(200, 255, 61, 0.2);
+  padding: 2px 8px;
+  border-radius: 100px;
+}
+
+.detail-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(28px, 4.5vw, 44px);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--color-text);
+}
+
+/* Price Matrix */
+.detail-price-matrix {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.2fr;
+  gap: 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  padding: 24px;
+}
+
+.price-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.price-val-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.price-sale {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.price-orig {
+  font-size: 14px;
+  color: var(--color-muted);
+  text-decoration: line-through;
+}
+
+.price-store-sub {
+  font-size: 10px;
+}
+
+.history-price {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.history-date {
+  font-size: 10px;
+}
+
+.actions-cell {
+  justify-content: center;
+  gap: 10px;
+}
+
+.detail-get-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  background: var(--color-accent);
+  color: var(--color-accent-fg);
+  padding: 12px 20px;
+  border-radius: 100px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.detail-get-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 24px rgba(200, 255, 61, 0.4);
+}
+
+.detail-wish-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--color-muted);
+  padding: 8px 16px;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.detail-wish-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+}
+
+.detail-wish-btn.active {
+  color: #FF5B55;
+  border-color: #FF5B55;
+}
+
+.detail-wish-btn.active svg {
+  fill: #FF5B55;
+}
+
+/* Store Comparison */
+.detail-store-comparison {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.comparison-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.comparison-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  transition: background 0.15s;
+}
+
+.comparison-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.comparison-row.best-store {
+  border-color: rgba(200, 255, 61, 0.25);
+  background: rgba(200, 255, 61, 0.03);
+}
+
+.comparison-store-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.comp-store-logo {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.comp-store-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.best-badge {
+  color: var(--color-accent);
+  font-size: 9px;
+  background: rgba(200, 255, 61, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.comparison-pricing {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.comp-price {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.comp-buy-link {
+  color: var(--color-accent);
+  text-decoration: none;
+  font-size: 11px;
+}
+
+.comp-buy-link:hover {
+  text-decoration: underline;
+}
+
+/* Screenshots Gallery */
+.detail-gallery-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.detail-screenshot-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.screenshot-tile {
+  border-radius: 10px;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.screenshot-tile:hover {
+  transform: scale(1.03);
+  border-color: rgba(200, 255, 61, 0.4);
+}
+
+.screenshot-tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ============================================================
+   12. RESPONSIVE BREAKPOINTS
    ============================================================ */
 @media (max-width: 768px) {
   .site-head-nav {
@@ -1407,4 +2035,9 @@
   .stores-platform-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .detail-price-matrix {
+    grid-template-columns: 1fr;
+  }
 }
+
